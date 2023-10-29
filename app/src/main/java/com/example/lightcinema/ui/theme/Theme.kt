@@ -4,6 +4,8 @@ import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -33,28 +35,34 @@ private val LightColorScheme = lightColorScheme(
     onError = Color.White,
 )
 
+private val DarkColorScheme = darkColorScheme(
+    primary = Red,
+    secondary = SkyBlue,
+    tertiary = LightBlue,
+    tertiaryContainer = Gray,
+    background = Color.White,
+    surface = Color.White,
+    surfaceTint = LightGray,
+    error = Red,
+
+    onPrimary = Color.White,
+    onSecondary = Blue,
+    onTertiary = Blue,
+    onTertiaryContainer = Blue,
+    onBackground = Blue,
+    onSurface = Color.Black,
+    onError = Color.White,
+)
+
 @Composable
 fun LightCinemaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-//    val colorScheme = when {
-//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-//            val context = LocalContext.current
-//            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-//        }
-//
-//        darkTheme -> DarkColorScheme
-//        else -> LightColorScheme
-//    }
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            dynamicLightColorScheme(context)
-        }
-
+        darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
     val view = LocalView.current

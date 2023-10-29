@@ -5,7 +5,7 @@ data class Seat(
     val row: Int,
     val numberInRow: Int,
     val costClass: CostClass,
-    val isSelected: Boolean
+    var isSelected: Boolean
 ) {
 
 }

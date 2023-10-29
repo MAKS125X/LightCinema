@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.lightcinema.ui.screens.CinemaScreen
+import com.example.lightcinema.ui.screens.SeatPreview
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,10 +17,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             LightCinemaTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
+                    CinemaScreen()
                 }
             }
         }
