@@ -1,6 +1,6 @@
-package com.example.lightcinema.data.network
+package com.example.lightcinema.data.network.visitor
 
-import com.example.lightcinema.data.network.api.ApiService
+import com.example.lightcinema.data.network.visitor.api.VisitorService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -13,7 +13,7 @@ object RetrofitInstance {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-    val api: ApiService by lazy {
-        retrofit.create(ApiService::class.java)
+    val api: VisitorService by lazy {
+        retrofit.create(VisitorService::class.java)
     }
 }
