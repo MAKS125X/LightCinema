@@ -1,4 +1,4 @@
-package com.example.lightcinema.models
+package com.example.lightcinema.data.models
 
 enum class CostClass {
     BASIC,

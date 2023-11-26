@@ -1,32 +1,43 @@
 package com.example.lightcinema.ui.screens
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.example.lightcinema.data.models.CostClass
 import com.example.lightcinema.getTestSeatsList
-import com.example.lightcinema.models.Seat
+import com.example.lightcinema.seatMapper
+import com.example.lightcinema.ui.models.Seat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class CinemaHallViewModel(
-    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
     private val _hallMatrix =
         MutableStateFlow(
-            getTestSeatsList()
+            getTestSeatsList().map { seatMapper(it) }
                 .groupBy { it.row }
                 .map { it.value.sortedBy { seat -> seat.numberInRow } }
                 .sortedBy { it.first().row }.flatten().toMutableList()
         )
     val hallMatrix = _hallMatrix.asStateFlow()
 
+
+    fun changeSeatSelectedState(seat: Seat) {
+        if (seat.costClass != CostClass.TAKEN) {
+            seat.isSelected.value = !seat.isSelected.value
+        }
+//        val index = hallMatrix.value.indexOfFirst { it == seat }
+//        hallMatrix.value[index] = seat.copy(isSelected = !seat.isSelected)
+    }
+
+
     fun changeSeatSelectedState(lastSeat: Seat, newSeat: Seat) {
         val newList = _hallMatrix.value.mapButReplace(lastSeat, newSeat)
 
-        _hallMatrix.value = newList.toMutableList()
+//        _hallMatrix.value = newList.toMutableList()
     }
 
-    fun <T> List<T>.mapButReplace(targetItem: T, newItem: T) = map {
+    private fun <T> List<T>.mapButReplace(targetItem: T, newItem: T) = map {
         if (it == targetItem) {
             newItem
         } else {
@@ -34,13 +45,14 @@ class CinemaHallViewModel(
         }
     }
 
+
     fun changeSeatSelectedState(row: Int, numberInRow: Int) {
         val index =
             _hallMatrix.value.indexOfFirst { it.row == row && it.numberInRow == numberInRow }
-        val seat = _hallMatrix.value[index].copy()
+//        val seat = _hallMatrix.value[index].copy()
 
         _hallMatrix.value.removeIf { it.row == row && it.numberInRow == numberInRow }
-        _hallMatrix.value.add(seat.copy(isSelected = !seat.isSelected))
+//        _hallMatrix.value.add(seat.copy(isSelected = !seat.isSelected))
 
         Log.d(
             "aboba",

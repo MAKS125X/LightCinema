@@ -1,7 +1,27 @@
 package com.example.lightcinema
 
-import com.example.lightcinema.models.CostClass
-import com.example.lightcinema.models.Seat
+import androidx.compose.runtime.mutableStateOf
+import com.example.lightcinema.data.models.CostClass
+import com.example.lightcinema.data.models.Seat
+
+//fun seatMapper(seat: com.example.lightcinema.data.models.Seat): com.example.lightcinema.ui.models.Seat {
+//    return com.example.lightcinema.ui.models.Seat(
+//        SeatId(seat.hallId, seat.row, seat.numberInRow),
+//        seat.costClass,
+//        seat.isSelected
+//    )
+//}
+
+fun seatMapper(seat: com.example.lightcinema.data.models.Seat): com.example.lightcinema.ui.models.Seat {
+    return com.example.lightcinema.ui.models.Seat(
+        seat.hallId,
+        seat.row,
+        seat.numberInRow,
+        seat.costClass,
+        mutableStateOf(seat.isSelected)
+    )
+}
+
 
 fun getTestSeatsList(): MutableList<Seat> {
     return mutableListOf(
@@ -38,9 +58,9 @@ fun getTestSeatsList(): MutableList<Seat> {
         Seat(1, 4, 7, CostClass.BASIC, false),
 
         Seat(1, 5, 1, CostClass.BASIC, false),
-        Seat(1, 5, 2, CostClass.TAKEN, true),
-        Seat(1, 5, 3, CostClass.BASIC, true),
-        Seat(1, 5, 4, CostClass.TAKEN, true),
+        Seat(1, 5, 2, CostClass.TAKEN, false),
+        Seat(1, 5, 3, CostClass.BASIC, false),
+        Seat(1, 5, 4, CostClass.TAKEN, false),
         Seat(1, 5, 5, CostClass.BASIC, false),
         Seat(1, 5, 6, CostClass.BASIC, false),
         Seat(1, 5, 7, CostClass.BASIC, false),

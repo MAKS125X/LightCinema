@@ -5,10 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -23,85 +23,68 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lightcinema.data.models.CostClass
 import com.example.lightcinema.getTestSeatsList
-import com.example.lightcinema.models.CostClass
-import com.example.lightcinema.models.Seat
+import com.example.lightcinema.seatMapper
+import com.example.lightcinema.ui.models.Seat
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 
 @Composable
 fun CinemaHallGrid(
-    matrix: MutableList<Seat>, onSeatClick: (Seat, Seat) -> Unit, seatHeight: Dp, seatWidth: Dp
+    matrix: MutableList<Seat>, onSeatClick: (Seat) -> Unit, seatHeight: Dp, seatWidth: Dp
 ) {
-//    val matrix by remember {
-//        mutableStateOf(seats.groupBy { it.row }
-//            .map { it.value.sortedBy { seat -> seat.numberInRow } }
-//            .sortedBy { it.first().row }
-//        )
-//    }
-
-
-    val TAG = "aboba"
     LazyVerticalGrid(columns = GridCells.Fixed(matrix.maxOf { it.numberInRow })) {
         itemsIndexed(items = matrix) { _, seat ->
-            Seat(seat = seat, height = seatHeight, width = seatWidth) { lastSeat, newSeat ->
-                onSeatClick(lastSeat, newSeat)
+            Seat(seat = seat, height = seatHeight, width = seatWidth) { lastSeat ->
+                onSeatClick(lastSeat)
             }
         }
     }
 }
-
 
 @Composable
 fun CinemaScreen(
     cinemaHallViewModel: CinemaHallViewModel = viewModel()
 ) {
     var scale by remember { mutableStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    val state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+    val state = rememberTransformableState { zoomChange, _, _ ->
         scale *= zoomChange
-        offset += offsetChange
     }
 
     val matrix by cinemaHallViewModel.hallMatrix.collectAsStateWithLifecycle()
 
-    Box(
-        contentAlignment = Alignment.Center, modifier = Modifier
-            // apply other transformations like rotation and zoom
-            // on the pizza slice emoji
-            .graphicsLayer(
-                scaleX = scale,
-                scaleY = scale,
-                translationX = offset.x,
-                translationY = offset.y
+    val film by remember { mutableStateOf("Drive") }
+
+
+    Text(text = film)
+
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Box(
+            contentAlignment = Alignment.Center, modifier = Modifier
+                .matchParentSize()
+                .scale(scale)
+        ) {
+            CinemaHallGrid(
+                matrix,
+                { a -> cinemaHallViewModel.changeSeatSelectedState(a) },
+                seatHeight = 51.dp,
+                seatWidth = 51.dp
             )
-            .transformable(state = state)
-            .fillMaxSize()
-    ) {
-        CinemaHallGrid(
-            matrix,
-            { a, b -> cinemaHallViewModel.changeSeatSelectedState(a, b) },
-            seatHeight = 51.dp,
-            seatWidth = 51.dp
-        )
+        }
     }
 }
 
-//@Preview(showBackground = true)
 @Composable
 fun Seat(
-    seat: Seat, height: Dp, width: Dp, onSeatClick: (Seat, Seat) -> Unit
+    seat: Seat, height: Dp, width: Dp, onSeatClick: (Seat) -> Unit
 ) {
-//    val seatIsSelected by remember {
-//        mutableStateOf(seat.isSelected)
-//    }
-    val backgroundColor = if (seat.isSelected) {
+    val backgroundColor = if (seat.isSelected.value) {
         MaterialTheme.colorScheme.tertiaryContainer
     } else {
         when (seat.costClass) {
@@ -110,7 +93,7 @@ fun Seat(
             CostClass.TAKEN -> MaterialTheme.colorScheme.primary
         }
     }
-    val textColor = if (seat.isSelected) {
+    val textColor = if (seat.isSelected.value) {
         MaterialTheme.colorScheme.onTertiaryContainer
     } else {
         when (seat.costClass) {
@@ -121,6 +104,7 @@ fun Seat(
     }
     Box(contentAlignment = Alignment.Center,
         modifier = Modifier
+            .padding(4.dp)
             .border(
                 1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(5.dp)
             )
@@ -131,7 +115,7 @@ fun Seat(
             )
             .clickable {
                 Log.v("aboba", "CLICKED")
-                onSeatClick(seat, seat.copy(isSelected = !seat.isSelected))
+                onSeatClick(seat)
             }
 
     ) {
@@ -144,25 +128,27 @@ fun Seat(
 
 @Preview(showBackground = true)
 @Composable
-fun CinemaHallPreview(seats: MutableList<Seat> = getTestSeatsList()) {
+fun CinemaHallPreview(
+    seats: MutableList<Seat> = getTestSeatsList().map { seatMapper(it) }.toMutableList()
+) {
     LightCinemaTheme {
-        CinemaHallGrid(mutableListOf(), { a, b -> }, seatHeight = 51.dp, seatWidth = 51.dp)
+        CinemaHallGrid(mutableListOf(), { a -> }, seatHeight = 51.dp, seatWidth = 51.dp)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun SeatPreview(
-    seat: Seat = Seat(1, 2, 3, CostClass.VIP, false), height: Dp = 22.dp, width: Dp = 22.dp
+    seat: Seat = Seat(1, 2, 3, CostClass.VIP, mutableStateOf(false)),
+    height: Dp = 22.dp,
+    width: Dp = 22.dp
 ) {
 //    val lineHeightSp: TextUnit = TextUnit.Unspecified
 //    val lineHeightDp: Dp = with(LocalDensity.current) {
 //        lineHeightSp.toDp()
 //    }
     LightCinemaTheme {
-        Seat(seat, height, width) { _, _ ->
+        Seat(seat, height, width) { _ ->
         }
     }
 }
-
-

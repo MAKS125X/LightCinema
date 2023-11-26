@@ -1,4 +1,6 @@
-package com.example.lightcinema.models
+package com.example.lightcinema.data.models
+
+import androidx.compose.runtime.MutableState
 
 data class Seat(
     val hallId: Int,
