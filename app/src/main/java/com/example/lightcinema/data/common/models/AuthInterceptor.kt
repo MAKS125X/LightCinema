@@ -1,6 +1,5 @@
-package com.example.lightcinema.di.auth
+package com.example.lightcinema.data.common.models
 
-import android.content.SharedPreferences
 import okhttp3.Interceptor
 import okhttp3.Response
 

@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens
+package com.example.lightcinema.ui.screens.cinemahall
 
 import  android.util.Log
 import androidx.compose.foundation.background
@@ -64,9 +64,13 @@ fun CinemaScreen(
 
     Text(text = film)
 
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
         Box(
-            contentAlignment = Alignment.Center, modifier = Modifier
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
                 .matchParentSize()
                 .scale(scale)
         ) {

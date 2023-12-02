@@ -8,8 +8,8 @@ import com.example.lightcinema.data.common.repository.AuthRepository
 import com.example.lightcinema.data.common.repository.AuthRepositoryNetwork
 import com.example.lightcinema.data.visitor.VisitorModule
 import com.example.lightcinema.data.visitor.VisitorModuleNetwork
-import com.example.lightcinema.di.auth.AuthInterceptor
-import com.example.lightcinema.di.auth.TokenManager
+import com.example.lightcinema.data.common.models.AuthInterceptor
+import com.example.lightcinema.data.common.models.TokenManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -30,6 +30,8 @@ class MyApplication : Application() {
     val authRepository: AuthRepository
         get() = _authRepository
 
+    private lateinit var _tokenManager: TokenManager
+
     override fun onCreate() {
         super.onCreate()
 
@@ -45,9 +47,9 @@ class MyApplication : Application() {
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
 
-        val tokenManager = TokenManager(sharedPreferences)
+        _tokenManager = TokenManager(sharedPreferences)
 
-        val authInterceptor = AuthInterceptor(tokenManager)
+        val authInterceptor = AuthInterceptor(_tokenManager)
         val okHttpClient = provideOkHttpClient(authInterceptor)
 
         _authRepository = provideAuthRepository(okHttpClient)
@@ -64,7 +66,7 @@ class MyApplication : Application() {
             .build()
             .create(AuthService::class.java)
 
-        return AuthRepositoryNetwork(retrofitBuilder)
+        return AuthRepositoryNetwork(retrofitBuilder, _tokenManager)
     }
 
     private fun provideVisitorModule(okHttpClient: OkHttpClient) =

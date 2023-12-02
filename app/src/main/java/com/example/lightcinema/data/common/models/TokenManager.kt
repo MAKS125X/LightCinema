@@ -1,4 +1,4 @@
-package com.example.lightcinema.di.auth
+package com.example.lightcinema.data.common.models
 
 import android.content.SharedPreferences
 
@@ -19,6 +19,10 @@ class TokenManager(private val sharedPreferences: SharedPreferences) {
             .putString(USER_ROLE_KEY, user.role.name)
             .apply()
     }
+
+//    fun saveToken(token: String, role: String) {
+//        saveToken(User(token, role))
+//    }
 
     fun deleteToken() {
         sharedPreferences.edit().remove(USER_TOKEN_KEY).apply()

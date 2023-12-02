@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens
+package com.example.lightcinema.ui.screens.cinemahall
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
