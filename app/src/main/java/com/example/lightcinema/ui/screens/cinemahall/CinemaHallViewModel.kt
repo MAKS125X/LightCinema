@@ -2,7 +2,7 @@ package com.example.lightcinema.ui.screens.cinemahall
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.example.lightcinema.data.models.CostClass
+import com.example.lightcinema.ui.models.CostClass
 import com.example.lightcinema.getTestSeatsList
 import com.example.lightcinema.seatMapper
 import com.example.lightcinema.ui.models.Seat

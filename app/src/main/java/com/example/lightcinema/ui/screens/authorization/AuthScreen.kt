@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lightcinema.ui.common.AuthTextField
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 import kotlinx.coroutines.launch
 
@@ -56,7 +57,12 @@ fun AuthScreen(
     onSuccessToken: () -> Unit = {}
 ) {
     LightCinemaTheme {
-        val pagerState = rememberPagerState(0)
+
+
+
+        val pagerState = rememberPagerState {
+            2
+        }
 
         val email by authViewModel.email.collectAsState()
 
@@ -336,7 +342,6 @@ fun TabsContent(
         RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp)
     }
     HorizontalPager(
-        pageCount = 2,
         state = pagerState,
         modifier = Modifier
             .drawWithContent {
@@ -383,57 +388,3 @@ fun TabsContent(
     }
 }
 
-
-@Preview(showBackground = true, device = Devices.PIXEL_2_XL)
-@Composable
-fun AuthTextField(
-    value: String = "",
-    onValueChange: (String) -> Unit = { },
-    labelText: String = "Почта",
-    keyboardType: KeyboardType = KeyboardType.Text,
-    width: Dp = 200.dp,
-) {
-    LightCinemaTheme {
-        OutlinedTextField(
-            value = value,
-            onValueChange = { onValueChange(it) },
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                disabledTextColor = MaterialTheme.colorScheme.onBackground,
-                errorTextColor = MaterialTheme.colorScheme.onBackground,
-                focusedContainerColor = MaterialTheme.colorScheme.background,
-                unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                disabledContainerColor = MaterialTheme.colorScheme.background,
-                errorContainerColor = MaterialTheme.colorScheme.background,
-                focusedSupportingTextColor = Color.Transparent,
-                unfocusedSupportingTextColor = Color.Transparent,
-                disabledSupportingTextColor = Color.Transparent,
-                errorSupportingTextColor = Color.Transparent,
-                focusedBorderColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedBorderColor = MaterialTheme.colorScheme.onBackground,
-                disabledBorderColor = MaterialTheme.colorScheme.onBackground,
-                errorBorderColor = MaterialTheme.colorScheme.onBackground,
-                focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
-                disabledLabelColor = MaterialTheme.colorScheme.onBackground,
-                errorLabelColor = MaterialTheme.colorScheme.onBackground,
-            ),
-            visualTransformation = if (keyboardType == KeyboardType.Password)
-                PasswordVisualTransformation()
-            else VisualTransformation.None,
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            placeholder = {
-                Text(
-                    text = labelText,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-            },
-            modifier = Modifier
-                .width(width)
-                .padding(10.dp, 0.dp, 10.dp, 0.dp),
-        )
-    }
-}

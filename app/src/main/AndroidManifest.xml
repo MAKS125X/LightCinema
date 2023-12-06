@@ -19,7 +19,8 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.LightCinema">
+            android:theme="@style/Theme.App.SplashScreen">
+<!--            android:theme="@style/Theme.LightCinema"-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,7 +1,6 @@
 package com.example.lightcinema.ui.models
 
 import androidx.compose.runtime.MutableState
-import com.example.lightcinema.data.models.CostClass
 
 class Seat(
     val hallId: Int,

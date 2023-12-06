@@ -6,10 +6,10 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.lightcinema.data.ApiResponse
-import com.example.lightcinema.data.common.models.User
-import com.example.lightcinema.data.common.repository.AuthRepository
-import com.example.lightcinema.data.visitor.network.responses.UserResponse
+import com.example.lightcinema.data.common.ApiResponse
+import com.example.lightcinema.data.auth.models.User
+import com.example.lightcinema.data.auth.models.UserResponse
+import com.example.lightcinema.data.auth.repository.AuthRepository
 import com.example.lightcinema.di.MyApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

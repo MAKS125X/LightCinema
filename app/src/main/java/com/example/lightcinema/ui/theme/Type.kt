@@ -32,3 +32,13 @@ val Typography = Typography(
     )
     */
 )
+
+val LightCinemaTypography = Typography(
+    bodyLarge = TextStyle(
+        fontFamily = anonymousProFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
+    )
+)

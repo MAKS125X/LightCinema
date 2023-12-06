@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="Theme.LightCinema" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.LightCinemaSplashScreen" parent="Theme.LightCinema"/>
+
+    <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
+<!--        <item name="windowSplashScreenBackground">@drawable/split_screen_background</item>-->
+        <item name="android:windowBackground">@drawable/split_screen_background</item>
+<!--        <item name="windowSplashScreenBackground">@color/teal_200</item>-->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.LightCinemaSplashScreen</item>
+<!--        <item name="windowSplashScreenAnimatedIcon">@drawable/...</item>-->
+    </style>
 </resources>

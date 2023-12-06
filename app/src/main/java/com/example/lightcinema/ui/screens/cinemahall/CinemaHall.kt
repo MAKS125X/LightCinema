@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.lightcinema.data.models.CostClass
+import com.example.lightcinema.ui.models.CostClass
 import com.example.lightcinema.getTestSeatsList
 import com.example.lightcinema.seatMapper
 import com.example.lightcinema.ui.models.Seat
