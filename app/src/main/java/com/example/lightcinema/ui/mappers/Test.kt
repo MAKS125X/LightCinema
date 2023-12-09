@@ -2,7 +2,6 @@ package com.example.lightcinema.ui.mappers
 
 import android.annotation.SuppressLint
 import com.example.lightcinema.data.visitor.network.responses.SessionDateResponse
-import com.example.lightcinema.ui.screens.filminfo.MovieModel
 import com.example.lightcinema.ui.screens.filminfo.SessionModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -52,27 +51,31 @@ fun main() {
 
     val formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
-    val mapped = sessions.groupBy({ LocalDateTime.parse(it.date, formatterDate).toLocalDate() }, {
-        SessionModel(
-            it.id, LocalDateTime.parse(it.date, formatterDate).toLocalTime(), it.minPrice
-        )
-    })
+//    val mapped = sessions.groupBy({ LocalDateTime.parse(it.date, formatterDate).toLocalDate() }, {
+//        SessionModel(
+//            it.id, LocalDateTime.parse(it.date, formatterDate).toLocalTime(), it.minPrice
+//        )
+//    })
+//
+//    mapped.forEach {
+//
+////        val sdf = SimpleDateFormat.getDateInstance().format(it.key)
+////        val sdf = SimpleDateFormat("EEE").format(it.key)
+//        println("${
+//            it.key.format(
+//                DateTimeFormatter.ofPattern(
+//                    "EEEE", Locale.getDefault()
+//                )
+//            )
+//                .replaceFirstChar { letter -> if (letter.isLowerCase()) letter.titlecase(Locale.getDefault()) else letter.toString() }
+//        } ${it.key.dayOfMonth}.${it.key.monthValue}")
+//    }
+//
+//    val newFormatterDate = DateTimeFormatter.ofPattern("yyyy-MMMM-dd HH:mm")
+//    println(LocalDateTime.parse("2023-12-10 12:00", formatterDate))
+//
+//
+//    val aboba: DateTime
 
-    mapped.forEach {
-
-//        val sdf = SimpleDateFormat.getDateInstance().format(it.key)
-//        val sdf = SimpleDateFormat("EEE").format(it.key)
-        println("${
-            it.key.format(
-                DateTimeFormatter.ofPattern(
-                    "EEEE", Locale.getDefault()
-                )
-            )
-                .replaceFirstChar { letter -> if (letter.isLowerCase()) letter.titlecase(Locale.getDefault()) else letter.toString() }
-        } ${it.key.dayOfMonth}.${it.key.monthValue}")
-    }
-
-    val newFormatterDate = DateTimeFormatter.ofPattern("yyyy-MMMM-dd HH:mm")
-    println(LocalDateTime.parse("2023-12-10 12:00", formatterDate) )
 
 }

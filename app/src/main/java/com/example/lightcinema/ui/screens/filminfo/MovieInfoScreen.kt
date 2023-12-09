@@ -27,6 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +53,8 @@ import com.example.lightcinema.data.visitor.network.responses.SessionDateRespons
 import com.example.lightcinema.ui.common.SessionInfoButton
 import com.example.lightcinema.ui.mappers.MovieMapper
 import com.example.lightcinema.ui.theme.LightCinemaTheme
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -58,12 +63,34 @@ fun MovieInfoScreen(viewModel: MovieInfoViewModel = viewModel(factory = MovieInf
 
     val movie = viewModel.movie.collectAsState()
 
-    when (val response = movie.value) {
-        is ApiResponse.Failure -> TODO()
-        ApiResponse.Loading -> MovieLoading()
-        is ApiResponse.Success -> MovieInfo(Modifier.fillMaxSize().padding(10.dp), response.data)
-    }
+    var refreshing by remember { mutableStateOf(false) }
 
+//    LaunchedEffect(refreshing) {
+//        if (refreshing) {
+//            delay(3000)
+//            refreshing = false
+//        }
+//    }
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = refreshing),
+        onRefresh = {
+            viewModel.updateMovieInfo()
+            refreshing = false
+        },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        //ToDo:CheckSwipes
+        when (val response = movie.value) {
+            is ApiResponse.Failure -> TODO()
+            ApiResponse.Loading -> MovieLoading()
+            is ApiResponse.Success -> MovieInfo(
+                Modifier
+                    .fillMaxSize()
+                    .padding(10.dp), response.data
+            )
+        }
+    }
 }
 
 
@@ -73,7 +100,10 @@ fun MovieInfo(
     modifier: Modifier = Modifier,
     movie: MovieModel
 ) {
-    LazyColumn(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    LazyColumn(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         item {
             Image(
                 ImageBitmap.imageResource(id = R.drawable.drive_horizontal),
@@ -114,18 +144,7 @@ fun MovieInfo(
         movie.sessionMap.forEach {
             item {
                 Text(
-                    text = "${
-                        it.key.format(
-                            DateTimeFormatter.ofPattern(
-                                "EEEE", Locale.getDefault()
-                            )
-                        )
-                            .replaceFirstChar { letter ->
-                                if (letter.isLowerCase()) letter.titlecase(
-                                    Locale.getDefault()
-                                ) else letter.toString()
-                            }
-                    } ${it.key.dayOfMonth}.${it.key.monthValue}",
+                    text = it.key,
                     fontSize = 26.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -142,7 +161,7 @@ fun MovieInfo(
                                 )
                             ), additionInfo = session.minPrice.toString()
                         ) {
-
+                            TODO()
                         }
                     }
                 }
@@ -248,7 +267,7 @@ fun MovieInfoPreview(
 @Composable
 fun MovieLoading(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = modifier, contentAlignment = Alignment.Center
     ) {
         Indicator()
     }
@@ -256,21 +275,14 @@ fun MovieLoading(modifier: Modifier = Modifier) {
 
 @Composable
 fun Indicator(
-    size: Dp = 32.dp, // indicator size
-    sweepAngle: Float = 90f, // angle (lenght) of indicator arc
-    color: Color = MaterialTheme.colorScheme.primary, // color of indicator arc line
-    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth //width of cicle and ar lines
+    size: Dp = 32.dp,
+    sweepAngle: Float = 90f,
+    color: Color = MaterialTheme.colorScheme.primary,
+    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth
 ) {
-    ////// animation //////
 
-    // docs recomend use transition animation for infinite loops
-    // https://developer.android.com/jetpack/compose/animation
     val transition = rememberInfiniteTransition(label = "Анимация загрузки")
 
-    // define the changing value from 0 to 360.
-    // This is the angle of the beginning of indicator arc
-    // this value will change over time from 0 to 360 and repeat indefinitely.
-    // it changes starting position of the indicator arc and the animation is obtained
     val currentArcStartAngle by transition.animateValue(
         0,
         360,
@@ -283,29 +295,19 @@ fun Indicator(
         ), label = "Анимация загрузки"
     )
 
-    ////// draw /////
-
-    // define stroke with given width and arc ends type considering device DPI
     val stroke = with(LocalDensity.current) {
         Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Square)
     }
 
-    // draw on canvas
     Canvas(
         Modifier
-            .progressSemantics() // (optional) for Accessibility services
-            .size(size) // canvas size
-            .padding(strokeWidth / 2) //padding. otherwise, not the whole circle will fit in the canvas
+            .progressSemantics()
+            .size(size)
+            .padding(strokeWidth / 2)
     ) {
-        // draw "background" (gray) circle with defined stroke.
-        // without explicit center and radius it fit canvas bounds
         drawCircle(Color.LightGray, style = stroke)
-
-        // draw arc with the same stroke
         drawArc(
             color,
-            // arc start angle
-            // -90 shifts the start position towards the y-axis
             startAngle = currentArcStartAngle.toFloat() - 90,
             sweepAngle = sweepAngle,
             useCenter = false,

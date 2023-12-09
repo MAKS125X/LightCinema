@@ -1,7 +1,9 @@
 package com.example.lightcinema.ui.screens.filminfo
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -16,19 +18,24 @@ import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class MovieInfoViewModel(private val repository: VisitorRepository) : ViewModel() {
+class MovieInfoViewModel(
+    private val repository: VisitorRepository,
+    private val savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+
+    private val movieId: Int = checkNotNull(savedStateHandle["movieId"])
 
     private var _movie: MutableStateFlow<ApiResponse<MovieModel>> =
         MutableStateFlow(ApiResponse.Loading)
     val movie: StateFlow<ApiResponse<MovieModel>> = _movie
 
     init {
-        getMovieInfo(2)
+        updateMovieInfo()
     }
 
-    fun getMovieInfo(id: Int) {
+    fun updateMovieInfo() {
         viewModelScope.launch {
-            repository.getMovieInfo(id).collect {
+            repository.getMovieInfo(movieId).collect {
                 _movie.value = it
             }
         }
@@ -49,7 +56,9 @@ class MovieInfoViewModel(private val repository: VisitorRepository) : ViewModel(
                         .create(VisitorService::class.java)
                 )
 
-                MovieInfoViewModel(repository = repository)
+                val savedStateHandle = createSavedStateHandle()
+
+                MovieInfoViewModel(repository = repository, savedStateHandle)
             }
         }
     }

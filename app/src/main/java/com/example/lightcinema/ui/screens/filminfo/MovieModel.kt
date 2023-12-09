@@ -1,8 +1,5 @@
 package com.example.lightcinema.ui.screens.filminfo
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-
 
 data class MovieModel(
     val id: Int,
@@ -13,5 +10,5 @@ data class MovieModel(
     val country: String,
     val onlyAdult: Boolean,
     val imageLink: String,
-    val sessionMap: Map<LocalDate, List<SessionModel>>
+    val sessionMap: Map<String, List<SessionModel>>
 )

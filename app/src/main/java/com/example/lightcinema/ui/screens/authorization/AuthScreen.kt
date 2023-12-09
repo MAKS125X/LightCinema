@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.lightcinema.ui.common.AuthTextField
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 import kotlinx.coroutines.launch
@@ -54,7 +55,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AuthScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
-    onSuccessToken: () -> Unit = {}
+    navController: NavController
 ) {
     LightCinemaTheme {
 
@@ -74,7 +75,8 @@ fun AuthScreen(
 
         val token by authViewModel.token.collectAsState()
         if (token != null) {
-            onSuccessToken()
+//            onSuccessToken()
+//            navController.navigate()
         }
         Box(
             contentAlignment = Alignment.Center,

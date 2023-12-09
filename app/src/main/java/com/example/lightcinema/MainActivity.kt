@@ -7,10 +7,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.lightcinema.ui.screens.authorization.AuthScreen
 import com.example.lightcinema.ui.screens.filminfo.MovieInfoScreen
+import com.example.lightcinema.ui.screens.poster.PosterScreen
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +28,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         installSplashScreen()
-
 
         super.onCreate(savedInstanceState)
 
@@ -28,8 +37,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
+                    val navController = rememberNavController()
+
 //                    PosterScreen()
-                    MovieInfoScreen()
+//                    MovieInfoScreen()
 
 
 //                    CinemaScreen()
@@ -119,6 +131,20 @@ class MainActivity : ComponentActivity() {
             }
 
         }
+    }
+
+
+    fun NavGraphBuilder.addVisitorGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+
+//        NavHost(navController = navController, startDestination = "poster") {
+            composable("auth") { AuthScreen(navController = navController) }
+            composable("poster") { PosterScreen() }
+            composable(
+                "movie/{movieId}",
+                arguments = listOf(navArgument("movieId") { type = NavType.IntType })
+            ) { MovieInfoScreen() }
+
+//        }
     }
 
     fun setSpecialtySelectedAtIndex(index: Int, isSelected: Boolean) {

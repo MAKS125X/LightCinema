@@ -103,11 +103,12 @@ fun TabsContent(
 ) {
     HorizontalPager(state = pagerState) { page ->
         when (page) {
-            0 ->  {
+            0 -> {
                 Column {
                     PosterTabItem(today)
                 }
             }
+
             1 -> {
                 Column {
                     PosterTabItem(tomorrow)

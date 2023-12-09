@@ -90,4 +90,9 @@ dependencies {
 
 //    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.24.13-rc")
+
+    val nav_version = "2.7.5"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
 }
