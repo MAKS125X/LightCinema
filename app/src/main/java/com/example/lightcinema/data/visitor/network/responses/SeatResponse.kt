@@ -1,8 +1,9 @@
 package com.example.lightcinema.data.visitor.network.responses
 
 class SeatResponse(
-    id: Int,
-    number: Int,
-    row: Int,
-    price: Int
+    val id: Int,
+    val number: Int,
+    val row: Int,
+    val price: Int,
+    val reserved: Boolean
 )

@@ -20,6 +20,6 @@ class VisitorModuleNetwork(client: OkHttpClient) : VisitorModule {
     override val visitorRepository: VisitorRepository = VisitorRepositoryNetwork(retrofitBuilder)
 
     companion object {
-        const val URL: String = "https://test.com"
+        const val URL: String = "http://10.0.2.2:5038"
     }
 }

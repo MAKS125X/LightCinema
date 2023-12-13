@@ -7,7 +7,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthService {
-    @POST("/login")
+    @POST("/Users/sign-in")
     suspend fun login(
         @Body user: UserRequest
     ): Response<UserResponse>

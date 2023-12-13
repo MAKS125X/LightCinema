@@ -1,5 +1,6 @@
 package com.example.lightcinema.ui.screens.authorization
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -12,24 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,80 +35,123 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
+import com.example.lightcinema.data.auth.models.User
+import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.ui.common.AuthTextField
-import com.example.lightcinema.ui.theme.LightCinemaTheme
+import com.example.lightcinema.ui.common.LoadIndicator
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AuthScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
-    navController: NavController
+    tokenViewModel: TokenViewModel = viewModel(factory = TokenViewModel.Factory),
+    onSuccess: () -> Unit,
 ) {
-    LightCinemaTheme {
+    val pagerState = rememberPagerState {
+        2
+    }
+
+    val nickname by authViewModel.nickname.collectAsState()
+
+    val registerPassword by authViewModel.registerPassword.collectAsState()
+
+    val registerRepeatPassword by authViewModel.registerRepeatPassword.collectAsState()
+
+    val loginPassword by authViewModel.loginPassword.collectAsState()
+
+    val token by tokenViewModel.token.observeAsState()
 
 
+    if (token != null) {
+        onSuccess()
+    }
 
-        val pagerState = rememberPagerState {
-            2
+
+    val userResult by authViewModel.userResult.collectAsState(null)
+
+    val context = LocalContext.current
+
+//    Log.d("asd", "${userResult.toString()}\n${token}")
+
+    when (val response = userResult) {
+        is ApiResponse.Failure -> {
+            Toast.makeText(context, response.errorMessage, Toast.LENGTH_LONG).show()
+            Log.d("asd", "${userResult.toString()}\n${token}")
         }
 
-        val email by authViewModel.email.collectAsState()
-
-        val registerPassword by authViewModel.registerPassword.collectAsState()
-
-        val registerRepeatPassword by authViewModel.registerRepeatPassword.collectAsState()
-
-        val loginPassword by authViewModel.loginPassword.collectAsState()
-
-        val token by authViewModel.token.collectAsState()
-        if (token != null) {
-//            onSuccessToken()
-//            navController.navigate()
+        ApiResponse.Loading -> {}
+        is ApiResponse.Success -> {
+            tokenViewModel.saveToken(response.data)
+            onSuccess()
         }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp, 0.dp, 20.dp, 0.dp)
-                    .border(
-                        BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
-                        RoundedCornerShape(16.dp, 16.dp, 16.dp, 16.dp)
-                    )
-            ) {
-                val context = LocalContext.current
-                Tabs(pagerState = pagerState)
-                TabsContent(
-                    pagerState = pagerState,
-                    email,
-                    { authViewModel.setEmail(it) },
-                    registerPassword,
-                    { authViewModel.setRegisterPassword(it) },
-                    registerRepeatPassword,
-                    { authViewModel.setRegisterRepeatPassword(it) },
-                    loginPassword,
-                    { authViewModel.setLoginPassword(it) },
-                    {
-                        authViewModel.register()
-                        Toast.makeText(context, "Welcome to the club buddy", Toast.LENGTH_LONG)
-                            .show()
-                    },
-                    { authViewModel.login() }
+
+        else -> {}
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+
+//        onSuccess()
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp, 0.dp, 20.dp, 0.dp)
+                .border(
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
+                    RoundedCornerShape(16.dp, 16.dp, 16.dp, 16.dp)
                 )
-            }
+        ) {
+
+            Tabs(pagerState = pagerState)
+            TabsContent(
+                pagerState = pagerState,
+                nickname = nickname,
+                onEmailChanged = { authViewModel.setEmail(it) },
+                loginPassword = loginPassword,
+                onLoginPasswordChanged = { authViewModel.setLoginPassword(it) },
+                registrationPassword = registerPassword,
+                onRegistrationPasswordChanged = { authViewModel.setRegisterPassword(it) },
+                repeatPassword = registerRepeatPassword,
+                onRepeatPasswordChanged = { authViewModel.setRegisterRepeatPassword(it) },
+                onRegistrationClick = {
+                    if (nickname == "") {
+                        Toast.makeText(context, "Введите имя пользователя", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                    if (registerPassword == "" || registerRepeatPassword == "") {
+                        Toast.makeText(context, "Введите пароль reg", Toast.LENGTH_LONG)
+                            .show()
+                    } else if (registerPassword != registerRepeatPassword) {
+                        Toast.makeText(context, "Введённые пароли не совпадают", Toast.LENGTH_LONG)
+                            .show()
+                    } else {
+                        authViewModel.register()
+                    }
+
+                },
+                onLoginClick = {
+                    if (nickname == "") {
+                        Toast.makeText(context, "Введите имя пользователя", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                    if (loginPassword == "") {
+                        Toast.makeText(context, "Введите пароль login", Toast.LENGTH_LONG)
+                            .show()
+                    } else {
+                        authViewModel.login()
+                    }
+                },
+                apiResponse = userResult
+            )
         }
     }
 }
@@ -118,12 +159,13 @@ fun AuthScreen(
 @Composable
 fun RegistrationTab(
     email: String,
-    onEmailChanged: (String) -> Unit,
+    onNicknameChanged: (String) -> Unit,
     password: String,
     onPasswordChanged: (String) -> Unit,
     repeatPassword: String,
     onRepeatPasswordChanged: (String) -> Unit,
-    onRegistrationClick: () -> Unit
+    onRegistrationClick: () -> Unit,
+    apiResponse: ApiResponse<User>?
 ) {
     Box(
         contentAlignment = Alignment.TopCenter,
@@ -147,9 +189,9 @@ fun RegistrationTab(
             Spacer(modifier = Modifier.height(20.dp))
             AuthTextField(
                 value = email,
-                onValueChange = { onEmailChanged(it) },
-                labelText = "Почта",
-                keyboardType = KeyboardType.Email,
+                onValueChange = { onNicknameChanged(it) },
+                labelText = "Имя пользователя",
+                keyboardType = KeyboardType.Text,
                 width = textFieldWidth
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -184,6 +226,9 @@ fun RegistrationTab(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
+            if (apiResponse is ApiResponse.Loading) {
+                LoadIndicator()
+            }
         }
     }
 }
@@ -191,10 +236,11 @@ fun RegistrationTab(
 @Composable
 fun LoginTab(
     email: String,
-    onEmailChanged: (String) -> Unit,
+    onNicknameChanged: (String) -> Unit,
     loginPassword: String,
     onLoginPassword: (String) -> Unit,
-    onLoginClicked: () -> Unit
+    onLoginClicked: () -> Unit,
+    apiResponse: ApiResponse<User>?
 ) {
     Box(
         contentAlignment = Alignment.TopCenter,
@@ -218,9 +264,9 @@ fun LoginTab(
             Spacer(modifier = Modifier.height(20.dp))
             AuthTextField(
                 value = email,
-                onValueChange = { onEmailChanged(it) },
-                labelText = "Почта",
-                keyboardType = KeyboardType.Email,
+                onValueChange = { onNicknameChanged(it) },
+                labelText = "Имя пользователя",
+                keyboardType = KeyboardType.Text,
                 width = textFieldWidth
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -247,6 +293,9 @@ fun LoginTab(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
+            if (apiResponse is ApiResponse.Loading) {
+                LoadIndicator()
+            }
         }
     }
 }
@@ -266,6 +315,7 @@ fun Tabs(pagerState: PagerState) {
         indicator = { },
         divider = { }
     ) {
+        val focusManager = LocalFocusManager.current
         list.forEachIndexed { index, _ ->
             Tab(
                 text = {
@@ -277,6 +327,8 @@ fun Tabs(pagerState: PagerState) {
                 selected = pagerState.currentPage == index,
 
                 onClick = {
+
+                    focusManager.clearFocus()
                     scope.launch {
                         pagerState.animateScrollToPage(index)
                     }
@@ -326,7 +378,7 @@ fun Tabs(pagerState: PagerState) {
 @Composable
 fun TabsContent(
     pagerState: PagerState,
-    email: String,
+    nickname: String,
     onEmailChanged: (String) -> Unit,
     loginPassword: String,
     onLoginPasswordChanged: (String) -> Unit,
@@ -335,7 +387,8 @@ fun TabsContent(
     repeatPassword: String,
     onRepeatPasswordChanged: (String) -> Unit,
     onRegistrationClick: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    apiResponse: ApiResponse<User>?
 ) {
     val color = MaterialTheme.colorScheme.surfaceTint
     if (pagerState.currentPage == 0) {
@@ -369,23 +422,28 @@ fun TabsContent(
             }
     ) { page ->
         when (page) {
-            0 -> RegistrationTab(
-                email,
-                { onEmailChanged(it) },
-                registrationPassword,
-                { onRegistrationPasswordChanged(it) },
-                repeatPassword,
-                { onRepeatPasswordChanged(it) },
-                { onRegistrationClick() }
-            )
+            0 -> {
+                RegistrationTab(
+                    nickname,
+                    { onEmailChanged(it) },
+                    registrationPassword,
+                    { onRegistrationPasswordChanged(it) },
+                    repeatPassword,
+                    { onRepeatPasswordChanged(it) },
+                    { onRegistrationClick() },
+                    apiResponse
+                )
+            }
 
             1 -> LoginTab(
-                email,
+                nickname,
                 { onEmailChanged(it) },
                 loginPassword,
                 { onLoginPasswordChanged(it) },
-                { onLoginClick() }
+                { onLoginClick() },
+                apiResponse
             )
+
         }
     }
 }

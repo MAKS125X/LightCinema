@@ -4,9 +4,9 @@ class MovieLongResponse(
     val id: Int,
     val name: String,
     val description: String,
-    val genre: List<String>,
+    val genres: List<String>,
     val createdYear: Int,
-    val country: String,
+    val countries: List<String>,
     val onlyAdult: Boolean,
     val imageLink: String,
     val sessions: List<SessionDateResponse>

@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.filminfo
+package com.example.lightcinema.ui.screens.movie_info
 
 data class SessionModel(
     val id: Int,

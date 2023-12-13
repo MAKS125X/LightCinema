@@ -1,21 +1,21 @@
-package com.example.lightcinema.ui.mappers
+package com.example.lightcinema.data.mappers
 
 import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
-import com.example.lightcinema.ui.screens.filminfo.MovieModel
-import com.example.lightcinema.ui.screens.filminfo.SessionModel
+import com.example.lightcinema.ui.screens.movie_info.MovieModel
+import com.example.lightcinema.ui.screens.movie_info.SessionModel
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class MovieMapper : Mapper<MovieLongResponse, MovieModel> {
+object MovieMapper : Mapper<MovieLongResponse, MovieModel> {
     override fun toModel(value: MovieLongResponse): MovieModel {
 
         val formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         val sessions =
-            value.sessions.groupBy({ LocalDateTime.parse(it.date, formatterDate).toLocalDate() }, {
+            value.sessions.groupBy({ LocalDateTime.parse(it.dateTime, formatterDate).toLocalDate() }, {
                 Triple<Int, LocalTime, Int>(
-                    it.id, LocalDateTime.parse(it.date, formatterDate).toLocalTime(), it.minPrice
+                    it.id, LocalDateTime.parse(it.dateTime, formatterDate).toLocalTime(), it.minPrice
                 )
             })
 
@@ -23,9 +23,9 @@ class MovieMapper : Mapper<MovieLongResponse, MovieModel> {
             value.id,
             value.name,
             value.description,
-            value.genre,
+            value.genres,
             value.createdYear,
-            value.country,
+            value.countries,
             value.onlyAdult,
             value.imageLink,
             sessions.mapKeys {
@@ -44,7 +44,7 @@ class MovieMapper : Mapper<MovieLongResponse, MovieModel> {
             }.mapValues {
                 it.value.map { triple ->
                     SessionModel(
-                        triple.first, it.value[1].second.format(
+                        triple.first, triple.second.format(
                             DateTimeFormatter.ofPattern(
                                 "HH:mm", Locale.getDefault()
                             )
@@ -53,5 +53,9 @@ class MovieMapper : Mapper<MovieLongResponse, MovieModel> {
                 }
             }
         )
+    }
+
+    override fun fromModel(value: MovieModel): MovieLongResponse {
+        TODO("Not yet implemented")
     }
 }

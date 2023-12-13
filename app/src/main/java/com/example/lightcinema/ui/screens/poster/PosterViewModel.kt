@@ -6,37 +6,34 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.lightcinema.data.common.ApiResponse
-import com.example.lightcinema.data.visitor.network.api.VisitorService
 import com.example.lightcinema.data.visitor.network.responses.MovieCollectionResponse
 import com.example.lightcinema.data.visitor.repository.VisitorRepository
-import com.example.lightcinema.data.visitor.repository.VisitorRepositoryMock
 import com.example.lightcinema.di.MyApplication
 import com.example.lightcinema.ui.models.SessionDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class PosterViewModel(private val repository: VisitorRepository) : ViewModel() {
 
     private var _posterToday =
         MutableStateFlow<ApiResponse<MovieCollectionResponse>>(ApiResponse.Loading)
-    val posterToday: StateFlow<ApiResponse<MovieCollectionResponse>> = _posterToday
+    val posterToday: StateFlow<ApiResponse<MovieCollectionResponse>> = _posterToday.asStateFlow()
 
     private var _posterTomorrow =
         MutableStateFlow<ApiResponse<MovieCollectionResponse>>(ApiResponse.Loading)
-    val posterTomorrow: StateFlow<ApiResponse<MovieCollectionResponse>> = _posterTomorrow
+    val posterTomorrow: StateFlow<ApiResponse<MovieCollectionResponse>> = _posterTomorrow.asStateFlow()
 
-    private var _posterOther =
+    private var _posterSoon =
         MutableStateFlow<ApiResponse<MovieCollectionResponse>>(ApiResponse.Loading)
-    val posterOther: StateFlow<ApiResponse<MovieCollectionResponse>> = _posterOther
+    val posterSoon: StateFlow<ApiResponse<MovieCollectionResponse>> = _posterSoon.asStateFlow()
 
     init {
         getPosterInfo(SessionDate.Today)
         getPosterInfo(SessionDate.Tomorrow)
-        getPosterInfo(SessionDate.Other)
+        getPosterInfo(SessionDate.Soon)
     }
 
     fun getPosterInfo(date: SessionDate) {
@@ -45,7 +42,7 @@ class PosterViewModel(private val repository: VisitorRepository) : ViewModel() {
                 when (date) {
                     SessionDate.Today -> _posterToday.value = it
                     SessionDate.Tomorrow -> _posterTomorrow.value = it
-                    SessionDate.Other -> _posterOther.value = it
+                    SessionDate.Soon -> _posterSoon.value = it
                 }
             }
         }
@@ -57,12 +54,12 @@ class PosterViewModel(private val repository: VisitorRepository) : ViewModel() {
                 val application =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MyApplication)
 
-//                val repository = application.visitorModule.visitorRepository
-                val repository = VisitorRepositoryMock(
-                    Retrofit.Builder().baseUrl(MyApplication.URL)
-                        .addConverterFactory(GsonConverterFactory.create()).build()
-                        .create(VisitorService::class.java)
-                )
+                val repository = application.visitorModule.visitorRepository
+//                val repository = VisitorRepositoryMock(
+//                    Retrofit.Builder().baseUrl(MyApplication.URL)
+//                        .addConverterFactory(GsonConverterFactory.create()).build()
+//                        .create(VisitorService::class.java)
+//                )
 
                 PosterViewModel(repository = repository)
             }

@@ -1,14 +1,21 @@
 package com.example.lightcinema.data.visitor.repository
 
 import com.example.lightcinema.data.common.ApiResponse
+import com.example.lightcinema.data.common.SuccessResponse
+import com.example.lightcinema.data.common.toModel
+import com.example.lightcinema.data.mappers.MovieMapper
+import com.example.lightcinema.data.mappers.ProfileMapper
 import com.example.lightcinema.data.visitor.network.api.VisitorService
 import com.example.lightcinema.data.visitor.network.responses.MovieCollectionResponse
 import com.example.lightcinema.data.visitor.network.responses.MovieItemResponse
 import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
+import com.example.lightcinema.data.visitor.network.responses.ProfileResponse
+import com.example.lightcinema.data.visitor.network.responses.ReserveResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionDateResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionTimeResponse
-import com.example.lightcinema.ui.mappers.MovieMapper
-import com.example.lightcinema.ui.screens.filminfo.MovieModel
+import com.example.lightcinema.ui.screens.cinemahall.SeatsModelCollection
+import com.example.lightcinema.ui.screens.movie_info.MovieModel
+import com.example.lightcinema.ui.screens.profile.ProfileModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -310,7 +317,7 @@ class VisitorRepositoryMock(
                         "Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание",
                         listOf("комедия", "взрослое кино", "пантомима"),
                         2011,
-                        "Россия",
+                        listOf("Россия"),
                         true,
                         "https://4.bp.blogspot.com/-pMdtPxE2iEk/Ty8RwlalpCI/AAAAAAAAF18/UaaLXMQIwCI/s1600/driceempire.jpg",
                         listOf(
@@ -378,7 +385,34 @@ class VisitorRepositoryMock(
                     )
                 )
             )
-        }.toModel(MovieMapper())
+        }.toModel(MovieMapper)
+    }
+
+    override suspend fun getProfileInfo(): Flow<ApiResponse<ProfileModel>> {
+        return flow {
+            emit(ApiResponse.Loading)
+            delay(2000L)
+            emit(
+                ApiResponse.Success(
+                    ProfileResponse(
+                        "aboba",
+                        listOf(
+                            ReserveResponse(1, 2, "Driveeeeee", 3, 4, 5, true, "2023-12-14 12:00"),
+                            ReserveResponse(1, 3, "Driveeeeee", 3, 4, 6, false, "2023-12-14 12:00"),
+                            ReserveResponse(1, 4, "Driveeeeee", 3, 4, 7, true, "2023-12-14 12:00"),
+                        )
+                    )
+                )
+            )
+        }.toModel(ProfileMapper)
+    }
+
+    override suspend fun unreserveSeatById(seatId: Int): Flow<ApiResponse<SuccessResponse>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSessionSeatsById(sessionId: Int): Flow<ApiResponse<SeatsModelCollection>> {
+        TODO("Not yet implemented")
     }
 }
 

@@ -7,5 +7,6 @@ class ReserveResponse(
     val hall: Int,
     val row: Int,
     val number: Int,
-    val dataTime: String //TODO Типизировать явно dateTime
+    val canUnreserve: Boolean,
+    val dataTime: String,
 )

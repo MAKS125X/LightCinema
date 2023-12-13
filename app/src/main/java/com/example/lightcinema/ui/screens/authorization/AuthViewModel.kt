@@ -6,42 +6,50 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.data.auth.models.User
-import com.example.lightcinema.data.auth.models.UserResponse
 import com.example.lightcinema.data.auth.repository.AuthRepository
+import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.di.MyApplication
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val repository: AuthRepository
 ) : ViewModel() {
 
-    private val _email = MutableStateFlow<String>("")
-    val email: StateFlow<String> = _email
+    private val _nickname = MutableStateFlow<String>("")
+    val nickname: StateFlow<String> = _nickname.asStateFlow()
 
     private val _loginPassword = MutableStateFlow<String>("")
-    val loginPassword: StateFlow<String> = _loginPassword
+    val loginPassword: StateFlow<String> = _loginPassword.asStateFlow()
 
     private val _registerPassword = MutableStateFlow<String>("")
-    val registerPassword: StateFlow<String> = _registerPassword
+    val registerPassword: StateFlow<String> = _registerPassword.asStateFlow()
 
     private val _registerRepeatPassword = MutableStateFlow<String>("")
-    val registerRepeatPassword: StateFlow<String> = _registerRepeatPassword
+    val registerRepeatPassword: StateFlow<String> = _registerRepeatPassword.asStateFlow()
 
 
-    private val _token = MutableStateFlow<User?>(repository.tokenManager.getToken())
-    val token: StateFlow<User?> = _token
+    //    private val _token = MutableStateFlow<User?>(repository.tokenManager.getToken())
+//    val token: StateFlow<User?> = _token.asStateFlow()
+    private val _userResult = MutableSharedFlow<ApiResponse<User>>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val userResult: Flow<ApiResponse<User>> = _userResult.distinctUntilChanged()
 
-
-    private val _registerResult = MutableStateFlow<ApiResponse<UserResponse>>(ApiResponse.Loading)
-    val registerResult: StateFlow<ApiResponse<UserResponse>> = _registerResult
+//    private val _registerResponse = MutableStateFlow<ApiResponse<User>>(ApiResponse.Loading)
+//    val registerResult: StateFlow<ApiResponse<User>> = _registerResponse.asStateFlow()
 
     fun setEmail(email: String) {
-        _email.value = email
+        _nickname.value = email
     }
 
     fun setLoginPassword(loginPassword: String) {
@@ -56,35 +64,24 @@ class AuthViewModel(
         _registerRepeatPassword.value = registerRepeatPassword
     }
 
-
-    fun saveToken() {
-
-    }
-
     fun register() {
-        val currentEmail = email.value
+        val currentEmail = nickname.value
         val currentPassword = registerPassword.value
-        if (currentEmail != null && currentPassword != null) {
-
-            viewModelScope.launch(Dispatchers.IO) {
-                repository.register(currentEmail, currentPassword).collect { result ->
-
-                    _registerResult.value = result
-
-//                    when (result) {
-//                        is ApiResponse.Success -> repository.tokenManager.saveToken(result.data)
-//                        is ApiResponse.Loading -> {}
-//                        is ApiResponse.Failure -> {}
-//                    }
-                }
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.login(currentEmail, currentPassword).collect { result ->
+                _userResult.tryEmit(result)
             }
-
-
         }
     }
 
     fun login() {
-
+        val currentEmail = nickname.value
+        val currentPassword = loginPassword.value
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.login(currentEmail, currentPassword).collect { result ->
+                _userResult.tryEmit(result)
+            }
+        }
     }
 
     companion object {
@@ -96,5 +93,4 @@ class AuthViewModel(
             }
         }
     }
-
 }

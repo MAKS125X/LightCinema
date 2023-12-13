@@ -1,11 +1,8 @@
-package com.example.lightcinema.ui.mappers
+package com.example.lightcinema.data.mappers
 
 import android.annotation.SuppressLint
 import com.example.lightcinema.data.visitor.network.responses.SessionDateResponse
-import com.example.lightcinema.ui.screens.filminfo.SessionModel
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @SuppressLint("SimpleDateFormat")
 fun main() {

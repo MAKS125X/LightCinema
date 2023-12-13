@@ -18,9 +18,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MyApplication : Application() {
 
-//    private lateinit var _authManager: AuthManager
-//    val authManager: AuthManager
-//        get() = _authManager
 
     private lateinit var _visitorModule: VisitorModule
     val visitorModule: VisitorModule
@@ -31,6 +28,8 @@ class MyApplication : Application() {
         get() = _authRepository
 
     private lateinit var _tokenManager: TokenManager
+    val tokenManager: TokenManager
+        get() = _tokenManager
 
     override fun onCreate() {
         super.onCreate()
@@ -66,7 +65,7 @@ class MyApplication : Application() {
             .build()
             .create(AuthService::class.java)
 
-        return AuthRepositoryNetwork(retrofitBuilder, _tokenManager)
+        return AuthRepositoryNetwork(retrofitBuilder)
     }
 
     private fun provideVisitorModule(okHttpClient: OkHttpClient) =
@@ -85,6 +84,7 @@ class MyApplication : Application() {
     }
 
     companion object {
-        const val URL: String = "https://test.com"
+//        const val URL: String = "http://192.168.1.65:5038"
+        const val URL: String = "http://10.0.2.2:5038"
     }
 }

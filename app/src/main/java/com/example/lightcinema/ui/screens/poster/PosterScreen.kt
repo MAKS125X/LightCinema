@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -32,14 +34,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_2
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.example.lightcinema.R
 import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.data.visitor.network.responses.MovieCollectionResponse
@@ -51,10 +55,15 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Preview(showBackground = true, device = PIXEL_2)
 @Composable
-fun PosterScreen(viewModel: PosterViewModel = viewModel(factory = PosterViewModel.Factory)) {
+fun PosterScreen(
+    viewModel: PosterViewModel = viewModel(factory = PosterViewModel.Factory),
+    onProfileClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {},
+    onMovieClick: (Int) -> Unit = {}
+) {
     val today = viewModel.posterToday.collectAsState()
     val tomorrow = viewModel.posterTomorrow.collectAsState()
-    val soon = viewModel.posterOther.collectAsState()
+    val soon = viewModel.posterSoon.collectAsState()
 
 
     val pagerState = rememberPagerState { 3 }
@@ -63,6 +72,7 @@ fun PosterScreen(viewModel: PosterViewModel = viewModel(factory = PosterViewMode
         Tabs(pagerState = pagerState)
         TabsContent(
             pagerState = pagerState,
+            onMovieClick,
             today.value,
             tomorrow.value,
             soon.value,
@@ -97,6 +107,7 @@ fun Tabs(pagerState: PagerState) {
 @Composable
 fun TabsContent(
     pagerState: PagerState,
+    onMovieClick: (Int) -> Unit = {},
     today: ApiResponse<MovieCollectionResponse>,
     tomorrow: ApiResponse<MovieCollectionResponse>,
     soon: ApiResponse<MovieCollectionResponse>
@@ -105,19 +116,19 @@ fun TabsContent(
         when (page) {
             0 -> {
                 Column {
-                    PosterTabItem(today)
+                    PosterTabItem(today, onMovieClick)
                 }
             }
 
             1 -> {
                 Column {
-                    PosterTabItem(tomorrow)
+                    PosterTabItem(tomorrow, onMovieClick)
                 }
             }
 
             2 -> {
                 Column {
-                    PosterTabItem(soon)
+                    PosterTabItem(soon, onMovieClick)
                 }
             }
         }
@@ -145,10 +156,16 @@ fun DateTab(date: String, selected: Boolean, onClick: () -> Unit, modifier: Modi
 
 
 @Composable
-fun PosterTabItem(movieCollection: ApiResponse<MovieCollectionResponse>) {
+fun PosterTabItem(
+    movieCollection: ApiResponse<MovieCollectionResponse>,
+    onMovieClick: (Int) -> Unit = {},
+) {
 
     when (movieCollection) {
-        is ApiResponse.Failure -> TODO()
+        is ApiResponse.Failure -> {
+
+        }
+
         ApiResponse.Loading -> {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Image(Icons.Filled.Refresh, contentDescription = "Загрузки")
@@ -166,7 +183,7 @@ fun PosterTabItem(movieCollection: ApiResponse<MovieCollectionResponse>) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     itemsIndexed(movieCollection.data.movies) { index, item ->
-                        FilmItem(movieItemResponse = item)
+                        MovieItem(movieItemResponse = item, onMovieClick)
                         Spacer(modifier = Modifier.padding(0.dp, 8.dp))
                     }
                 }
@@ -175,21 +192,62 @@ fun PosterTabItem(movieCollection: ApiResponse<MovieCollectionResponse>) {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun FilmItem(movieItemResponse: MovieItemResponse) {
+fun MovieItem(
+    movieItemResponse: MovieItemResponse = MovieItemResponse(
+        1,
+        "asdasdasd",
+        listOf("комедия", "взрослое кино"),
+        "https://sun9-71.userapi.com/impg/ck60z-8Y_vF8B5urhqeQoifuShrfSpdKGC4g6w/1jVcP3dUl50.jpg?size=729x1080&quality=96&sign=e005de3b8f377ab81d270111c896f16f&c_uniq_tag=Kis5yX7bgJvKFm7TS5ZCrg5X28Mb9VC6uIAf3mLe98g&type=album",
+        listOf(
+            SessionTimeResponse(1, "9:00", 300),
+            SessionTimeResponse(2, "11:00", 300),
+            SessionTimeResponse(3, "13:00", 300),
+            SessionTimeResponse(4, "15:00", 300),
+            SessionTimeResponse(5, "17:00", 300),
+            SessionTimeResponse(6, "19:00", 300),
+            SessionTimeResponse(7, "21:00", 300),
+            SessionTimeResponse(8, "23:00", 300),
+        )
+    ), onClick: (Int) -> Unit = {}
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+            .clickable { onClick(movieItemResponse.id) }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(4.dp)) {
-            AsyncImage(
-                model = R.drawable.drive,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+//            Image(
+//                ImageBitmap.imageResource(R.drawable.drive),
+//                contentDescription = movieItemResponse.name,
+//                contentScale = ContentScale.Fit,
+//                modifier = Modifier.width(108.dp)
+//            )
+            SubcomposeAsyncImage(
+                model = movieItemResponse.posterLink,
+                loading = {
+                    Box {
+                        CircularProgressIndicator()
+                    }
+                },
                 contentDescription = movieItemResponse.name,
                 contentScale = ContentScale.Fit,
+                error = {
+                    Image(
+                        ImageBitmap.imageResource(R.drawable.drive),
+                        contentDescription = "Нельзя загрузить изображение"
+                    )
+                },
                 modifier = Modifier.width(108.dp)
             )
+            Spacer(modifier = Modifier.width(10.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = movieItemResponse.name.uppercase(),
@@ -197,10 +255,11 @@ fun FilmItem(movieItemResponse: MovieItemResponse) {
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
-                    text = movieItemResponse.genre.joinToString(", ") { it },
+                    text = movieItemResponse.genres.joinToString(", ") { it },
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
+                    softWrap = true,
                     modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
                 )
                 movieItemResponse.sessions?.let {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LightCinema</string>
+    <string name="poster_today">Сегодня</string>
+    <string name="poster_tomorrow">Завтра</string>
+    <string name="poster_soon">Скоро</string>
+</resources>

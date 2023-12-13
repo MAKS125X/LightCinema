@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.lightcinema"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -60,6 +60,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3:1.1.2")
+//    implementation("androidx.compose.material:material:1.5.4")
 //    implementation("androidx.security:security-crypto-ktx:1.0.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -93,6 +94,9 @@ dependencies {
 
     implementation ("com.google.accompanist:accompanist-swiperefresh:0.24.13-rc")
 
-    val nav_version = "2.7.5"
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    val navVersion = "2.7.5"
+    implementation("androidx.navigation:navigation-compose:$navVersion")
+
+    implementation ("com.github.chihsuanwu:compose-free-scroll:0.2.1")
+    implementation("io.github.oleksandrbalan:minabox:1.6.0")
 }

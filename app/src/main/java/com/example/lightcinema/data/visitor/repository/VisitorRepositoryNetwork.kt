@@ -1,13 +1,18 @@
 package com.example.lightcinema.data.visitor.repository
 
 import com.example.lightcinema.data.common.ApiResponse
+import com.example.lightcinema.data.common.SuccessResponse
 import com.example.lightcinema.data.common.apiRequestFlow
+import com.example.lightcinema.data.common.toModel
+import com.example.lightcinema.data.mappers.MovieMapper
+import com.example.lightcinema.data.mappers.ProfileMapper
+import com.example.lightcinema.data.mappers.SeatMapper
 import com.example.lightcinema.data.visitor.network.api.VisitorService
-import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
-import com.example.lightcinema.ui.mappers.MovieMapper
-import com.example.lightcinema.ui.screens.filminfo.MovieModel
+import com.example.lightcinema.data.visitor.network.requests.UnreservedSeatsRequest
+import com.example.lightcinema.ui.screens.cinemahall.SeatsModelCollection
+import com.example.lightcinema.ui.screens.movie_info.MovieModel
+import com.example.lightcinema.ui.screens.profile.ProfileModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class VisitorRepositoryNetwork(
     override val remoteDataSource: VisitorService
@@ -16,25 +21,21 @@ class VisitorRepositoryNetwork(
     override suspend fun getMovieCollection(
         withSession: Boolean,
         date: String
-    ) = apiRequestFlow { remoteDataSource.getMoviesByDay(withSession, date) }
+    ) = apiRequestFlow { remoteDataSource.getMoviesByDay(date, withSession) }
 
     override suspend fun getMovieInfo(
         id: Int
     ): Flow<ApiResponse<MovieModel>> =
-        apiRequestFlow { remoteDataSource.getMovieById(id) }.toModel(MovieMapper())
+        apiRequestFlow { remoteDataSource.getMovieById(id) }.toModel(MovieMapper)
 
+    override suspend fun getProfileInfo(): Flow<ApiResponse<ProfileModel>> =
+        apiRequestFlow { remoteDataSource.getProfileInfo() }.toModel(ProfileMapper)
 
+    override suspend fun unreserveSeatById(seatId: Int): Flow<ApiResponse<SuccessResponse>> =
+        apiRequestFlow { remoteDataSource.unreservePlaces(UnreservedSeatsRequest(seatId)) }
+
+    override suspend fun getSessionSeatsById(sessionId: Int): Flow<ApiResponse<SeatsModelCollection>> =
+        apiRequestFlow { remoteDataSource.getSessionSeats(sessionId) }.toModel(SeatMapper)
 }
 
-fun Flow<ApiResponse<MovieLongResponse>>.toModel(movieMapper: MovieMapper): Flow<ApiResponse<MovieModel>> =
-    map { value ->
-        when (val a = value) {
-            is ApiResponse.Failure -> return@map a
-            is ApiResponse.Loading -> return@map a
-            is ApiResponse.Success -> return@map ApiResponse.Success<MovieModel>(
-                movieMapper.toModel(
-                    a.data
-                )
-            )
-        }
-    }
+
