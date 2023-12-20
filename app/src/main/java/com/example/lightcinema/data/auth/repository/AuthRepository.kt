@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 interface AuthRepository {
 
     val remoteDataSource: AuthService
-//    val tokenManager: TokenManager
 
     suspend fun login(login: String, password: String): Flow<ApiResponse<User>>
 

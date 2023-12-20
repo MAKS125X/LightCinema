@@ -1,21 +1,21 @@
 package com.example.lightcinema.ui.screens.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.lightcinema.data.common.ApiResponse
-import com.example.lightcinema.data.visitor.network.api.VisitorService
 import com.example.lightcinema.data.visitor.repository.VisitorRepository
-import com.example.lightcinema.data.visitor.repository.VisitorRepositoryMock
 import com.example.lightcinema.di.MyApplication
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import java.net.SocketTimeoutException
 
 class ProfileViewModel(private val visitorRepository: VisitorRepository) : ViewModel() {
 
@@ -28,15 +28,30 @@ class ProfileViewModel(private val visitorRepository: VisitorRepository) : ViewM
     }
 
     fun updateProfileInfo() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+            viewModelScope.launch(Dispatchers.Main) {
+                if (error is SocketTimeoutException) {
+                    Log.d("asd", "${error}")
+                    _profileInfo.value = ApiResponse.Failure(500, "Отсутствие подключения к сети")
+                }
+            }
+        }) {
             visitorRepository.getProfileInfo().collect {
                 _profileInfo.value = it
             }
         }
     }
 
-    fun unreserve(id: Int) {
-
+    fun unreserve(sessionId: Int, seatId: Int) {
+        viewModelScope.launch {
+            visitorRepository.unreserveSeatById(sessionId, seatId).collect {
+                when (it) {
+                    is ApiResponse.Failure -> {}
+                    ApiResponse.Loading -> {}
+                    is ApiResponse.Success -> updateProfileInfo()
+                }
+            }
+        }
     }
 
     companion object {
@@ -46,13 +61,6 @@ class ProfileViewModel(private val visitorRepository: VisitorRepository) : ViewM
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MyApplication)
 
                 val repository = application.visitorModule.visitorRepository
-//                val repository = VisitorRepositoryMock(
-//                    Retrofit.Builder()
-//                        .baseUrl(MyApplication.URL)
-//                        .addConverterFactory(GsonConverterFactory.create())
-//                        .build()
-//                        .create(VisitorService::class.java)
-//                )
 
                 ProfileViewModel(visitorRepository = repository)
             }

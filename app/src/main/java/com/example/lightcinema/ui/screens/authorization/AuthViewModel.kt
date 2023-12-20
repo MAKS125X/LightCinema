@@ -1,5 +1,8 @@
 package com.example.lightcinema.ui.screens.authorization
 
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -10,6 +13,8 @@ import com.example.lightcinema.data.auth.models.User
 import com.example.lightcinema.data.auth.repository.AuthRepository
 import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.di.MyApplication
+import com.example.lightcinema.ui.common.CoroutinesErrorHandler
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import java.net.SocketTimeoutException
 
 class AuthViewModel(
     private val repository: AuthRepository
@@ -64,11 +70,20 @@ class AuthViewModel(
         _registerRepeatPassword.value = registerRepeatPassword
     }
 
+    val error by mutableStateOf("")
+
     fun register() {
         val currentEmail = nickname.value
         val currentPassword = registerPassword.value
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.login(currentEmail, currentPassword).collect { result ->
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+            viewModelScope.launch(Dispatchers.Main) {
+                if (error is SocketTimeoutException) {
+                    Log.d("asd", "${error}")
+                    _userResult.tryEmit(ApiResponse.Failure(500, "Отсутствие подключения к сети"))
+                }
+            }
+        }) {
+            repository.register(currentEmail, currentPassword).collect { result ->
                 _userResult.tryEmit(result)
             }
         }
@@ -77,7 +92,14 @@ class AuthViewModel(
     fun login() {
         val currentEmail = nickname.value
         val currentPassword = loginPassword.value
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+            viewModelScope.launch(Dispatchers.Main) {
+                if (error is SocketTimeoutException) {
+                    Log.d("asd", "${error}")
+                    _userResult.tryEmit(ApiResponse.Failure(500, "Отсутствие подключения к сети"))
+                }
+            }
+        }) {
             repository.login(currentEmail, currentPassword).collect { result ->
                 _userResult.tryEmit(result)
             }

@@ -24,10 +24,11 @@ import com.example.lightcinema.ui.common.LightCinemaScaffold
 import com.example.lightcinema.ui.navigation.AppState
 import com.example.lightcinema.ui.navigation.MainDestinations
 import com.example.lightcinema.ui.screens.authorization.AuthScreen
-import com.example.lightcinema.ui.screens.cinemahall.CinemaScreen
 import com.example.lightcinema.ui.screens.movie_info.MovieInfoScreen
 import com.example.lightcinema.ui.screens.poster.PosterScreen
 import com.example.lightcinema.ui.screens.profile.ProfileScreen
+import com.example.lightcinema.ui.screens.reserving_screen.ReservingScreen
+import com.example.lightcinema.ui.screens.reserving_screen.SuccessScreen
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 
 class MainActivity : ComponentActivity() {
@@ -55,15 +56,18 @@ class MainActivity : ComponentActivity() {
 //                        SeatsModelCollectionPreview()
                         NavHost(
                             navController = appState.navController,
-                            startDestination = MainDestinations.AUTH,
+                            startDestination = MainDestinations.SHARE,
                         ) {
                             navGraph(
                                 onSuccess = appState::navigateToVisitorModule,
                                 onMovieClick = appState::navigateToMovieInfo,
-                                profileUpPress = appState::upPress,
-                                onSessionClick = appState::navigateToSessionsScreen
+                                upPress = appState::upPress,
+                                onSessionClick = appState::navigateToSessionsScreen,
+                                onSuccessReservation = appState::navigateToSuccessScreen,
+                                finishReserving = appState::navigateToVisitorModule,
                             )
                         }
+
                     }
 
                 }
@@ -81,76 +85,84 @@ class MainActivity : ComponentActivity() {
     private fun NavGraphBuilder.navGraph(
         onSuccess: (NavBackStackEntry) -> Unit,
         onMovieClick: (Int, NavBackStackEntry) -> Unit,
-        onSessionClick: (Int, Int, NavBackStackEntry) -> Unit,
-        profileUpPress: () -> Unit,
+        onSessionClick: (Int, NavBackStackEntry) -> Unit,
+        upPress: () -> Unit,
+        onSuccessReservation: (String, NavBackStackEntry) -> Unit,
+        finishReserving: (NavBackStackEntry) -> Unit
     ) {
         addAuthGraph(onSuccess = onSuccess)
         addVisitorGraph(
             onMovieClick = onMovieClick,
-            profileUpPress = { profileUpPress() },
-            onSessionClick = onSessionClick
+            upPress = upPress,
+            onSessionClick = onSessionClick,
+            onSuccessReservation = onSuccessReservation,
+            finishReserving = finishReserving
         )
     }
 
     private fun NavGraphBuilder.addAuthGraph(onSuccess: (NavBackStackEntry) -> Unit) {
-        composable(
-            route = MainDestinations.AUTH,
+        navigation(
+            route = MainDestinations.SHARE,
+            startDestination = MainDestinations.AUTH
         ) {
-            AuthScreen(onSuccess = {
-                onSuccess(it)
+            composable(
+                route = MainDestinations.AUTH,
+            ) {
+                AuthScreen(onSuccess = { onSuccess(it) })
             }
-            )
         }
     }
 
     private fun NavGraphBuilder.addVisitorGraph(
         onMovieClick: (Int, NavBackStackEntry) -> Unit,
-        onSessionClick: (Int, Int, NavBackStackEntry) -> Unit,
-        profileUpPress: () -> Unit,
+        onSessionClick: (Int, NavBackStackEntry) -> Unit,
+        upPress: () -> Unit,
+        onSuccessReservation: (String, NavBackStackEntry) -> Unit,
+        finishReserving: (NavBackStackEntry) -> Unit,
     ) {
         navigation(
             route = MainDestinations.VISITOR_ROUTE,
-            startDestination = MainDestinations.POSTER_ROUTE
+            startDestination =
+            "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}"
         ) {
-
-            composable(MainDestinations.POSTER_ROUTE) {
+            composable("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}") {
                 PosterScreen(
                     onMovieClick = { id -> onMovieClick(id, it) },
+                    onSessionClick = { sessionId -> onSessionClick(sessionId, it) },
                 )
             }
             composable(
-                "${MainDestinations.POSTER_ROUTE}/{${MainDestinations.MOVIE_INFO}}",
+                "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}/{${MainDestinations.MOVIE_INFO}}",
                 arguments = listOf(navArgument(MainDestinations.MOVIE_INFO) {
                     type = NavType.IntType
                 })
             ) {
-                MovieInfoScreen(onSessionClick = { movieId, sessionId ->
-                    onSessionClick(
-                        movieId,
-                        sessionId,
-                        it
-                    )
-                })
+                MovieInfoScreen(onSessionClick = { sessionId -> onSessionClick(sessionId, it) })
             }
             composable("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.PROFILE}") {
                 ProfileScreen(
-                    upPress = { profileUpPress() }
+                    upPress = { upPress() }
                 )
             }
             composable(
-                "${MainDestinations.POSTER_ROUTE}/{${MainDestinations.MOVIE_INFO}}/{${MainDestinations.SESSIONS}}",
-                arguments = listOf(
-                    navArgument(
-                        MainDestinations.MOVIE_INFO,
-                        ) {
-                        type = NavType.IntType
-                    },
-                    navArgument(MainDestinations.SESSIONS) {
-                        type = NavType.IntType
-                    })
+                "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SESSIONS}/{${MainDestinations.SESSION}}",
+                arguments = listOf(navArgument(MainDestinations.SESSION) {
+                    type = NavType.IntType
+                })
             ) {
-                CinemaScreen(
-//                    upPress = { profileUpPress() }
+                ReservingScreen(
+                    upPress = { upPress() },
+                    finishReserving = { success -> onSuccessReservation(success, it) }
+                )
+            }
+            composable(
+                "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SUCCESS_ROUTE}/{${MainDestinations.SUCCESS}}",
+                arguments = listOf(navArgument(MainDestinations.SUCCESS) {
+                    type = NavType.StringType
+                })
+            ) {
+                SuccessScreen(
+                    onFinish = { finishReserving(it) }
                 )
             }
         }

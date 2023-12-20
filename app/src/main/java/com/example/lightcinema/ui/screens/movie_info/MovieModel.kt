@@ -1,5 +1,7 @@
 package com.example.lightcinema.ui.screens.movie_info
 
+import com.example.lightcinema.ui.models.SessionModel
+
 
 data class MovieModel(
     val id: Int,

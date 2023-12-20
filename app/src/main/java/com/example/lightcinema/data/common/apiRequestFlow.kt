@@ -15,7 +15,6 @@ fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiResponse<T>> = 
 
     withTimeoutOrNull(20000L) {
         val response = call()
-
         try {
             if (response.isSuccessful) {
                 response.body()?.let { data ->
@@ -26,13 +25,14 @@ fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiResponse<T>> = 
                     error.close()
                     val parsedError: ErrorResponse =
                         Gson().fromJson(error.charStream(), ErrorResponse::class.java)
-                    emit(ApiResponse.Failure(parsedError.errorCode, parsedError.errorMessage))
+                    emit(ApiResponse.Failure(parsedError.statusCode, parsedError.errorMessage))
                 }
+                //TODO: Привязаться к коду
             }
         } catch (e: Exception) {
             emit(ApiResponse.Failure(400, e.message ?: e.toString()))
         }
-    } ?: emit(ApiResponse.Failure(408,"Timeout! Please try again." ))
+    } ?: emit(ApiResponse.Failure(408, "Timeout! Please try again."))
 }.flowOn(Dispatchers.IO)
 
 fun <ResponseType : Any, ModelType : Any> Flow<ApiResponse<ResponseType>>.toModel(mapper: Mapper<ResponseType, ModelType>): Flow<ApiResponse<ModelType>> =

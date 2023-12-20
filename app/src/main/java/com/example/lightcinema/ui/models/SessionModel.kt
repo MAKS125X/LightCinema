@@ -1,7 +1,7 @@
 package com.example.lightcinema.ui.models
 
-//class SessionModel(
-//    val id: Int,
-//    val time: String,
-//    val minPrice: String
-//)
+data class SessionModel(
+    val id: Int,
+    val time: String,
+    val minPrice: Int
+)

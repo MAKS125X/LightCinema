@@ -1,5 +1,6 @@
 package com.example.lightcinema.ui.screens.poster
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,16 +31,17 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices.PIXEL_2
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,13 +55,11 @@ import com.example.lightcinema.ui.common.SessionInfoButton
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
-@Preview(showBackground = true, device = PIXEL_2)
 @Composable
 fun PosterScreen(
     viewModel: PosterViewModel = viewModel(factory = PosterViewModel.Factory),
-    onProfileClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {},
-    onMovieClick: (Int) -> Unit = {}
+    onMovieClick: (Int) -> Unit,
+    onSessionClick: (Int) -> Unit
 ) {
     val today = viewModel.posterToday.collectAsState()
     val tomorrow = viewModel.posterTomorrow.collectAsState()
@@ -73,6 +73,7 @@ fun PosterScreen(
         TabsContent(
             pagerState = pagerState,
             onMovieClick,
+            onSessionClick,
             today.value,
             tomorrow.value,
             soon.value,
@@ -108,6 +109,7 @@ fun Tabs(pagerState: PagerState) {
 fun TabsContent(
     pagerState: PagerState,
     onMovieClick: (Int) -> Unit = {},
+    onSessionClick: (Int) -> Unit,
     today: ApiResponse<MovieCollectionResponse>,
     tomorrow: ApiResponse<MovieCollectionResponse>,
     soon: ApiResponse<MovieCollectionResponse>
@@ -116,19 +118,19 @@ fun TabsContent(
         when (page) {
             0 -> {
                 Column {
-                    PosterTabItem(today, onMovieClick)
+                    PosterTabItem(today, true, onMovieClick, onSessionClick)
                 }
             }
 
             1 -> {
                 Column {
-                    PosterTabItem(tomorrow, onMovieClick)
+                    PosterTabItem(tomorrow, true, onMovieClick, onSessionClick)
                 }
             }
 
             2 -> {
                 Column {
-                    PosterTabItem(soon, onMovieClick)
+                    PosterTabItem(soon, false, onMovieClick, onSessionClick)
                 }
             }
         }
@@ -150,7 +152,6 @@ fun DateTab(date: String, selected: Boolean, onClick: () -> Unit, modifier: Modi
                 shape = RoundedCornerShape(8.dp)
             )
             .border(1.dp, color = colorScheme.primary, shape = RoundedCornerShape(8.dp))
-
     )
 }
 
@@ -158,12 +159,16 @@ fun DateTab(date: String, selected: Boolean, onClick: () -> Unit, modifier: Modi
 @Composable
 fun PosterTabItem(
     movieCollection: ApiResponse<MovieCollectionResponse>,
+    showSessions: Boolean,
     onMovieClick: (Int) -> Unit = {},
+    onSessionClick: (Int) -> Unit,
 ) {
-
+    val context = LocalContext.current
     when (movieCollection) {
         is ApiResponse.Failure -> {
-
+            LaunchedEffect(Unit) {
+                Toast.makeText(context, movieCollection.errorMessage, Toast.LENGTH_LONG).show()
+            }
         }
 
         ApiResponse.Loading -> {
@@ -183,7 +188,12 @@ fun PosterTabItem(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     itemsIndexed(movieCollection.data.movies) { index, item ->
-                        MovieItem(movieItemResponse = item, onMovieClick)
+                        MovieItem(
+                            movieItemResponse = item,
+                            showSessions,
+                            onMovieClick,
+                            onSessionClick
+                        )
                         Spacer(modifier = Modifier.padding(0.dp, 8.dp))
                     }
                 }
@@ -192,44 +202,27 @@ fun PosterTabItem(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun MovieItem(
-    movieItemResponse: MovieItemResponse = MovieItemResponse(
-        1,
-        "asdasdasd",
-        listOf("комедия", "взрослое кино"),
-        "https://sun9-71.userapi.com/impg/ck60z-8Y_vF8B5urhqeQoifuShrfSpdKGC4g6w/1jVcP3dUl50.jpg?size=729x1080&quality=96&sign=e005de3b8f377ab81d270111c896f16f&c_uniq_tag=Kis5yX7bgJvKFm7TS5ZCrg5X28Mb9VC6uIAf3mLe98g&type=album",
-        listOf(
-            SessionTimeResponse(1, "9:00", 300),
-            SessionTimeResponse(2, "11:00", 300),
-            SessionTimeResponse(3, "13:00", 300),
-            SessionTimeResponse(4, "15:00", 300),
-            SessionTimeResponse(5, "17:00", 300),
-            SessionTimeResponse(6, "19:00", 300),
-            SessionTimeResponse(7, "21:00", 300),
-            SessionTimeResponse(8, "23:00", 300),
-        )
-    ), onClick: (Int) -> Unit = {}
+    movieItemResponse: MovieItemResponse,
+    showSessions: Boolean = true,
+    onMovieClick: (Int) -> Unit,
+    onSessionClick: (Int) -> Unit
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
-            .clickable { onClick(movieItemResponse.id) }
+            .clickable { onMovieClick(movieItemResponse.id) }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-//            Image(
-//                ImageBitmap.imageResource(R.drawable.drive),
-//                contentDescription = movieItemResponse.name,
-//                contentScale = ContentScale.Fit,
-//                modifier = Modifier.width(108.dp)
-//            )
             SubcomposeAsyncImage(
                 model = movieItemResponse.posterLink,
                 loading = {
@@ -245,28 +238,35 @@ fun MovieItem(
                         contentDescription = "Нельзя загрузить изображение"
                     )
                 },
-                modifier = Modifier.width(108.dp)
+                modifier = Modifier
+                    .width(108.dp)
+                    .clip(RoundedCornerShape(12.dp))
             )
             Spacer(modifier = Modifier.width(10.dp))
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = movieItemResponse.name.uppercase(),
-                    fontSize = 26.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Text(
-                    text = movieItemResponse.genres.joinToString(", ") { it },
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Center,
-                    softWrap = true,
-                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
-                )
-                movieItemResponse.sessions?.let {
-                    SessionFlexRow(
-                        sessionShort = it,
-                        modifier = Modifier.fillMaxWidth()
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = movieItemResponse.name.uppercase(),
+                        fontSize = 26.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
+                    Text(
+                        text = movieItemResponse.genres.joinToString(", ") { it },
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                        softWrap = true,
+                        modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
+                    )
+                    if (showSessions) {
+                        movieItemResponse.sessions?.let {
+                            SessionFlexRow(
+                                sessionShort = it,
+                                modifier = Modifier.fillMaxWidth(),
+                                onSessionClick = onSessionClick
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -275,14 +275,21 @@ fun MovieItem(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SessionFlexRow(sessionShort: List<SessionTimeResponse>, modifier: Modifier) {
+fun SessionFlexRow(
+    sessionShort: List<SessionTimeResponse>,
+    modifier: Modifier,
+    onSessionClick: (Int) -> Unit
+) {
     FlowRow(
         horizontalArrangement = Arrangement.SpaceAround,
         maxItemsInEachRow = 3,
         modifier = modifier
     ) {
         for (session in sessionShort) {
-            SessionInfoButton(session.time, session.minPrice.toString(), onClick = { TODO() })
+            SessionInfoButton(
+                session.time,
+                session.minPrice.toString(),
+                onClick = { onSessionClick(session.id) })
         }
     }
 }

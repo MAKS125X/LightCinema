@@ -15,8 +15,12 @@ class AppState(
 
     val shouldShowTopAppBar: Boolean
         @Composable get() {
-            Log.d("Aboba", "${navController.currentDestination?.route}")
+            Log.d("Aboba121", "${navController.currentDestination?.route}")
             return navController.currentBackStackEntryAsState().value?.destination?.route != MainDestinations.AUTH
+                    && !(navController.currentBackStackEntryAsState().value?.destination?.route?.contains(
+                "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SUCCESS_ROUTE}/"
+            ) ?: false)
+
         }
 
     val currentRoute: String?
@@ -50,15 +54,41 @@ class AppState(
 
     fun navigateToMovieInfo(movie: Int, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            navController.navigate("${MainDestinations.POSTER_ROUTE}/$movie")
+            navController.navigate("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}/$movie")
+        }
+    }
+
+    fun navigateToSessionsScreen(sessionId: Int, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SESSIONS}/$sessionId") {
+//                launchSingleTop = true
+//                restoreState = true
+            }
+        }
+    }
+
+    fun navigateToSuccessScreen(successString: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(
+                "${MainDestinations.VISITOR_ROUTE}/" +
+                        "${MainDestinations.SUCCESS_ROUTE}/" + successString
+            ) {
+                currentRoute?.let {
+                    popUpTo(it) {
+                        inclusive = true
+                    }
+                }
+            }
         }
     }
 
     fun navigateToVisitorModule(from: NavBackStackEntry) {
-        navController.navigate(MainDestinations.VISITOR_ROUTE) {
-            currentRoute?.let {
-                popUpTo(it) {
-                    inclusive = true
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(MainDestinations.VISITOR_ROUTE) {
+                currentRoute?.let {
+                    popUpTo(it) {
+                        inclusive = true
+                    }
                 }
             }
         }
@@ -80,14 +110,7 @@ class AppState(
         }
     }
 
-    fun navigateToSessionsScreen(movie: Int, sessionId: Int, from: NavBackStackEntry) {
-        if (from.lifecycleIsResumed()) {
-            navController.navigate("${MainDestinations.POSTER_ROUTE}/$movie/$sessionId") {
-//                launchSingleTop = true
-//                restoreState = true
-            }
-        }
-    }
+
 }
 
 private fun NavBackStackEntry.lifecycleIsResumed() =

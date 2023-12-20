@@ -25,6 +25,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -43,6 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lightcinema.data.auth.models.User
 import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.ui.common.AuthTextField
+import com.example.lightcinema.ui.common.CoroutinesErrorHandler
 import com.example.lightcinema.ui.common.LoadIndicator
 import kotlinx.coroutines.launch
 
@@ -72,17 +74,16 @@ fun AuthScreen(
         onSuccess()
     }
 
-
     val userResult by authViewModel.userResult.collectAsState(null)
 
     val context = LocalContext.current
 
-//    Log.d("asd", "${userResult.toString()}\n${token}")
-
     when (val response = userResult) {
         is ApiResponse.Failure -> {
-            Toast.makeText(context, response.errorMessage, Toast.LENGTH_LONG).show()
-            Log.d("asd", "${userResult.toString()}\n${token}")
+            LaunchedEffect(Unit){
+                Toast.makeText(context, response.errorMessage, Toast.LENGTH_LONG).show()
+                Log.d("asd", "${userResult.toString()}\n${token}")
+            }
         }
 
         ApiResponse.Loading -> {}
@@ -98,9 +99,6 @@ fun AuthScreen(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-
-//        onSuccess()
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -443,7 +441,6 @@ fun TabsContent(
                 { onLoginClick() },
                 apiResponse
             )
-
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.cinemahall
+package com.example.lightcinema.ui.screens.reserving_screen
 
 import androidx.compose.runtime.MutableState
 

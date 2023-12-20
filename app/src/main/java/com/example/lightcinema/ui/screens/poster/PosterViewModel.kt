@@ -1,5 +1,6 @@
 package com.example.lightcinema.ui.screens.poster
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,11 +11,13 @@ import com.example.lightcinema.data.visitor.network.responses.MovieCollectionRes
 import com.example.lightcinema.data.visitor.repository.VisitorRepository
 import com.example.lightcinema.di.MyApplication
 import com.example.lightcinema.ui.models.SessionDate
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.net.SocketTimeoutException
 
 class PosterViewModel(private val repository: VisitorRepository) : ViewModel() {
 
@@ -24,7 +27,8 @@ class PosterViewModel(private val repository: VisitorRepository) : ViewModel() {
 
     private var _posterTomorrow =
         MutableStateFlow<ApiResponse<MovieCollectionResponse>>(ApiResponse.Loading)
-    val posterTomorrow: StateFlow<ApiResponse<MovieCollectionResponse>> = _posterTomorrow.asStateFlow()
+    val posterTomorrow: StateFlow<ApiResponse<MovieCollectionResponse>> =
+        _posterTomorrow.asStateFlow()
 
     private var _posterSoon =
         MutableStateFlow<ApiResponse<MovieCollectionResponse>>(ApiResponse.Loading)
@@ -37,7 +41,23 @@ class PosterViewModel(private val repository: VisitorRepository) : ViewModel() {
     }
 
     fun getPosterInfo(date: SessionDate) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+            viewModelScope.launch(Dispatchers.Main) {
+                if (error is SocketTimeoutException) {
+                    Log.d("asd", "${error}")
+                    when (date) {
+                        SessionDate.Today -> _posterToday.value =
+                            ApiResponse.Failure(500, "Отсутствие подключения к сети")
+
+                        SessionDate.Tomorrow -> _posterTomorrow.value =
+                            ApiResponse.Failure(500, "Отсутствие подключения к сети")
+
+                        SessionDate.Soon -> _posterSoon.value =
+                            ApiResponse.Failure(500, "Отсутствие подключения к сети")
+                    }
+                }
+            }
+        }) {
             repository.getMovieCollection(true, date.name).collect {
                 when (date) {
                     SessionDate.Today -> _posterToday.value = it

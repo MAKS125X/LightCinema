@@ -26,11 +26,11 @@ object ProfileMapper : Mapper<ProfileResponse, ProfileModel> {
 object ReserveMapper : Mapper<ReserveResponse, ReserveModel> {
     override fun toModel(value: ReserveResponse): ReserveModel {
         val formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        val date = LocalDateTime.parse(value.dataTime, formatterDate).toLocalDate()
-        val time = LocalDateTime.parse(value.dataTime, formatterDate).toLocalTime()
+        val date = LocalDateTime.parse(value.dateTime, formatterDate).toLocalDate()
+        val time = LocalDateTime.parse(value.dateTime, formatterDate).toLocalTime()
         return ReserveModel(
             value.sessionId,
-            value.placeId,
+            value.seatId,
             value.movieName.uppercase(Locale.getDefault()),
             value.hall,
             value.row,

@@ -1,5 +1,6 @@
 package com.example.lightcinema.ui.screens.main
 
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
@@ -15,6 +16,16 @@ class MainViewModel(private val tokenManager: TokenManager) : ViewModel() {
 
     private val _userResult = MutableStateFlow(tokenManager.getToken())
     val userResult: StateFlow<User?> = _userResult.asStateFlow()
+
+    init {
+        val listener =
+            SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+                if (key == TokenManager.USER_TOKEN_KEY) {
+                    _userResult.value = tokenManager.getToken()
+                }
+            }
+        tokenManager.sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+    }
 
     fun logout() {
         tokenManager.deleteToken()

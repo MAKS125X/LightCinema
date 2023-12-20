@@ -25,63 +25,6 @@ import com.example.lightcinema.ui.screens.main.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LightCinemaTopBar(
-    onProfileClick: () -> Unit,
-    onLogoutClick: () -> Unit,
-) {
-    val mainViewModel: MainViewModel =
-        viewModel<MainViewModel>(factory = MainViewModel.Factory)
-    TopAppBar(
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = mainViewModel.getName())
-                IconButton(onClick = {
-                    mainViewModel.logout()
-                    onLogoutClick()
-                }) {
-                    Icon(
-                        imageVector = Icons.Outlined.ExitToApp,
-                        contentDescription = "Выйти из системы",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .padding(0.dp)
-                    )
-                }
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surfaceTint,
-            titleContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-            actionIconContentColor = MaterialTheme.colorScheme.onTertiaryContainer
-        ),
-        navigationIcon = {
-            IconButton(onClick = {
-                onProfileClick()
-            }) {
-                Icon(
-                    imageVector = Icons.Outlined.AccountCircle,
-                    contentDescription = "Профиль",
-                    modifier = Modifier.size(48.dp)
-                )
-            }
-        },
-        actions = {
-            Column(horizontalAlignment = Alignment.End) {
-                Text(text = "Самара, Космопорт")
-                Text(
-                    text = "ул.Пушкина, д.133",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-        }
-    )
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun LightCinemaScaffold(
     showTopAppBar: Boolean,
     onProfileClick: () -> Unit,

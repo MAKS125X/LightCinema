@@ -12,7 +12,7 @@ interface AuthService {
         @Body user: UserRequest
     ): Response<UserResponse>
 
-    @POST("/register")
+    @POST("/Users/sign-up")
     suspend fun register(
         @Body user: UserRequest
     ): Response<UserResponse>

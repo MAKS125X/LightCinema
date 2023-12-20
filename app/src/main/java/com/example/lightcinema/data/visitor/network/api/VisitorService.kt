@@ -1,13 +1,15 @@
 package com.example.lightcinema.data.visitor.network.api
 
 import com.example.lightcinema.data.common.SuccessResponse
-import com.example.lightcinema.data.visitor.network.requests.PlacesRequest
-import com.example.lightcinema.data.visitor.network.requests.UnreservedSeatsRequest
+import com.example.lightcinema.data.visitor.network.requests.ReserveRequest
+import com.example.lightcinema.data.visitor.network.requests.UnreserveRequest
 import com.example.lightcinema.data.visitor.network.responses.MovieCollectionResponse
 import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
 import com.example.lightcinema.data.visitor.network.responses.PlaceResponse
 import com.example.lightcinema.data.visitor.network.responses.ProfileResponse
 import com.example.lightcinema.data.visitor.network.responses.SeatsCollectionResponse
+import com.example.lightcinema.data.visitor.network.responses.SessionsByMovieResponse
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -17,10 +19,8 @@ import retrofit2.http.Query
 
 interface VisitorService {
 
-    //    @Headers("JWT")
-    @POST("/Users/profile")
+    @GET("/Users/profile")
     suspend fun getProfileInfo(
-//        @Header("Authorization") token: String
     ): Response<ProfileResponse>
 
     @GET("/Movies")
@@ -28,36 +28,31 @@ interface VisitorService {
         @Query("date") date: String,
         @Query("withSessions") withSessions: Boolean = true,
     ): Response<MovieCollectionResponse>
-//    ): Response<List<MovieResponse>>
 
     @GET("/Movies/{id}")
     suspend fun getMovieById(
         @Path("id") id: Int
     ): Response<MovieLongResponse>
 
-    @GET("/Sessions/{id}/places")
-    suspend fun getPlacesBySession(
-        @Path("id") id: Int
-    ): Response<List<PlaceResponse>>
-
-    //    @Headers("JWT")
-    @POST("/Sessions/reserve")
+    @POST("/Sessions/{id}/reserve")
     suspend fun reservePlaces(
-//        @Header("Authorization") token: String,
-        @Body placesRequest: PlacesRequest
-    ): Response<String>
+        @Path("id") id: Int,
+        @Body placesRequest: ReserveRequest
+    ): Response<ResponseBody>
 
-    //    @Headers("JWT")
-    @POST("/Sessions/unreserve")
+    @POST("/Sessions/{id}/unreserve")
     suspend fun unreservePlaces(
-//        @Header("Authorization") token: String,
-        @Body placeRequest: UnreservedSeatsRequest
-    ): Response<SuccessResponse>
+        @Path("id") id: Int,
+        @Body placeRequest: UnreserveRequest
+    ): Response<ResponseBody>
+
+    @GET("/Sessions/{id}")
+    suspend fun getAnotherMovieSessions(
+        @Path("id") id: Int
+    ): Response<SessionsByMovieResponse>
 
     @GET("/Sessions/{id}/seats")
     suspend fun getSessionSeats(
         @Path("id") id: Int
     ): Response<SeatsCollectionResponse>
-
-
 }

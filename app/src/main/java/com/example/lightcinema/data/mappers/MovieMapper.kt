@@ -2,7 +2,7 @@ package com.example.lightcinema.data.mappers
 
 import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
 import com.example.lightcinema.ui.screens.movie_info.MovieModel
-import com.example.lightcinema.ui.screens.movie_info.SessionModel
+import com.example.lightcinema.ui.models.SessionModel
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter

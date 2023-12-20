@@ -24,10 +24,9 @@ class AuthRepositoryNetwork(
         password: String
     ): Flow<ApiResponse<User>> {
         return apiRequestFlow {
-            remoteDataSource.login(UserRequest(login, password))
+            remoteDataSource.register(UserRequest(login, password))
         }.toUser(login)
     }
-
 }
 
 fun UserResponse.toUser(nickname: String): User {

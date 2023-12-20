@@ -1,7 +1,6 @@
 package com.example.lightcinema.data.visitor.repository
 
 import com.example.lightcinema.data.common.ApiResponse
-import com.example.lightcinema.data.common.SuccessResponse
 import com.example.lightcinema.data.common.toModel
 import com.example.lightcinema.data.mappers.MovieMapper
 import com.example.lightcinema.data.mappers.ProfileMapper
@@ -13,12 +12,14 @@ import com.example.lightcinema.data.visitor.network.responses.ProfileResponse
 import com.example.lightcinema.data.visitor.network.responses.ReserveResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionDateResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionTimeResponse
-import com.example.lightcinema.ui.screens.cinemahall.SeatsModelCollection
 import com.example.lightcinema.ui.screens.movie_info.MovieModel
 import com.example.lightcinema.ui.screens.profile.ProfileModel
+import com.example.lightcinema.ui.screens.reserving_screen.AnotherSessionModel
+import com.example.lightcinema.ui.screens.reserving_screen.SeatsModelCollection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.ResponseBody
 
 class VisitorRepositoryMock(
     override val remoteDataSource: VisitorService
@@ -407,11 +408,25 @@ class VisitorRepositoryMock(
         }.toModel(ProfileMapper)
     }
 
-    override suspend fun unreserveSeatById(seatId: Int): Flow<ApiResponse<SuccessResponse>> {
+    override suspend fun unreserveSeatById(
+        sessionId: Int,
+        seatId: Int
+    ): Flow<ApiResponse<ResponseBody>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun getSessionSeatsById(sessionId: Int): Flow<ApiResponse<SeatsModelCollection>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAnotherMovieSessions(sessionId: Int): Flow<ApiResponse<AnotherSessionModel>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun reserveSeats(
+        sessionId: Int,
+        seats: List<Int>
+    ): Flow<ApiResponse<ResponseBody>> {
         TODO("Not yet implemented")
     }
 }

@@ -2,7 +2,7 @@ package com.example.lightcinema.data.auth.models
 
 import android.content.SharedPreferences
 
-class TokenManager(private val sharedPreferences: SharedPreferences) {
+class TokenManager(val sharedPreferences: SharedPreferences) {
 
     fun getToken(): User? {
         val userId = sharedPreferences.getString(USER_TOKEN_KEY, null)
@@ -23,10 +23,6 @@ class TokenManager(private val sharedPreferences: SharedPreferences) {
             .apply()
     }
 
-//    fun saveToken(token: String, role: String) {
-//        saveToken(User(token, role))
-//    }
-
     fun deleteToken() {
         sharedPreferences.edit().remove(USER_TOKEN_KEY).apply()
         sharedPreferences.edit().remove(USER_ROLE_KEY).apply()
@@ -34,8 +30,8 @@ class TokenManager(private val sharedPreferences: SharedPreferences) {
     }
 
     companion object {
-        private val USER_TOKEN_KEY = "userToken"
-        private val USER_ROLE_KEY = "userRole"
-        private val USER_USERNAME_KEY = "userName"
+        val USER_TOKEN_KEY = "userToken"
+        val USER_ROLE_KEY = "userRole"
+        val USER_USERNAME_KEY = "userName"
     }
 }

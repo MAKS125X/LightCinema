@@ -1,5 +1,5 @@
 package com.example.lightcinema.data.visitor.network.requests
 
-class UnreservedSeatsRequest(
-    val id: Int
+class UnreserveRequest(
+    val seatId: Int
 )

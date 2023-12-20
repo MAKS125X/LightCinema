@@ -1,7 +1,7 @@
 package com.example.lightcinema.ui.screens.movie_info
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,9 +23,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,7 +50,7 @@ import java.util.Locale
 @Composable
 fun MovieInfoScreen(
     viewModel: MovieInfoViewModel = viewModel(factory = MovieInfoViewModel.Factory),
-    onSessionClick: (Int, Int) -> Unit
+    onSessionClick: (Int) -> Unit
 ) {
 
     val movie = viewModel.movie.collectAsState()
@@ -60,6 +63,7 @@ fun MovieInfoScreen(
 //            refreshing = false
 //        }
 //    }
+    val context = LocalContext.current
 
     SwipeRefresh(
         state = rememberSwipeRefreshState(isRefreshing = refreshing),
@@ -71,7 +75,12 @@ fun MovieInfoScreen(
     ) {
         //ToDo:CheckSwipes
         when (val response = movie.value) {
-            is ApiResponse.Failure -> TODO()
+            is ApiResponse.Failure -> {
+                LaunchedEffect(Unit) {
+                    Toast.makeText(context, response.errorMessage, Toast.LENGTH_LONG).show()
+                }
+            }
+
             ApiResponse.Loading -> MovieLoading()
             is ApiResponse.Success -> MovieInfo(
                 Modifier
@@ -82,13 +91,12 @@ fun MovieInfoScreen(
     }
 }
 
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MovieInfo(
     modifier: Modifier = Modifier,
     movie: MovieModel,
-    onSessionClick: (Int, Int) -> Unit
+    onSessionClick: (Int) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -107,7 +115,7 @@ fun MovieInfo(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.onBackground, RectangleShape)
+                    .clip(RoundedCornerShape(8.dp))
             )
         }
         item {
@@ -164,7 +172,7 @@ fun MovieInfo(
                                 )
                             ), additionInfo = session.minPrice.toString()
                         ) {
-                            onSessionClick(movie.id, session.id)
+                            onSessionClick(session.id)
                         }
                     }
                 }
@@ -262,7 +270,7 @@ fun MovieInfoPreview(
             Modifier
                 .fillMaxSize()
                 .padding(10.dp), movie
-        ) { _, _ -> }
+        ) { _ -> }
     }
 }
 
