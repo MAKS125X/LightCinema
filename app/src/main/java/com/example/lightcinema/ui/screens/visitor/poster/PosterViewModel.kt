@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.poster
+package com.example.lightcinema.ui.screens.visitor.poster
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

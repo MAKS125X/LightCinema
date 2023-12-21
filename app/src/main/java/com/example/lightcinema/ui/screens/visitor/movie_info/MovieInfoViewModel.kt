@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.movie_info
+package com.example.lightcinema.ui.screens.visitor.movie_info
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle

@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.profile
+package com.example.lightcinema.ui.screens.visitor.profile
 
 class ReserveModel(
     val sessionId: Int,

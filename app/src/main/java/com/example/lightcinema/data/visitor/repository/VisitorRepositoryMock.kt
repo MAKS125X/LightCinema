@@ -12,10 +12,10 @@ import com.example.lightcinema.data.visitor.network.responses.ProfileResponse
 import com.example.lightcinema.data.visitor.network.responses.ReserveResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionDateResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionTimeResponse
-import com.example.lightcinema.ui.screens.movie_info.MovieModel
-import com.example.lightcinema.ui.screens.profile.ProfileModel
-import com.example.lightcinema.ui.screens.reserving_screen.AnotherSessionModel
-import com.example.lightcinema.ui.screens.reserving_screen.SeatsModelCollection
+import com.example.lightcinema.ui.screens.visitor.movie_info.MovieModel
+import com.example.lightcinema.ui.screens.visitor.profile.ProfileModel
+import com.example.lightcinema.ui.screens.visitor.reserving_screen.AnotherSessionModel
+import com.example.lightcinema.ui.screens.visitor.reserving_screen.SeatsModelCollection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

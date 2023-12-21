@@ -2,7 +2,7 @@ package com.example.lightcinema.data.mappers
 
 import com.example.lightcinema.data.visitor.network.responses.SessionsByMovieResponse
 import com.example.lightcinema.ui.models.SessionModel
-import com.example.lightcinema.ui.screens.reserving_screen.AnotherSessionModel
+import com.example.lightcinema.ui.screens.visitor.reserving_screen.AnotherSessionModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale

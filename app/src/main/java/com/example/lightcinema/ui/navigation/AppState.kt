@@ -30,18 +30,6 @@ class AppState(
         navController.navigateUp()
     }
 
-    fun navigateToBottomBarRoute(route: String) {
-        if (route != currentRoute) {
-            navController.navigate(route) {
-                launchSingleTop = true
-                restoreState = true
-                popUpTo(findStartDestination(navController.graph).id) {
-                    saveState = true
-                }
-            }
-        }
-    }
-
     fun navigateToAuth() {
         navController.navigate(MainDestinations.AUTH) {
             currentRoute?.let {
@@ -96,7 +84,13 @@ class AppState(
 
     fun navigateToAdminModule(from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            navController.navigate(MainDestinations.ADMIN_ROUTE)
+            navController.navigate(MainDestinations.ADMIN_ROUTE) {
+                currentRoute?.let {
+                    popUpTo(it) {
+                        inclusive = true
+                    }
+                }
+            }
         }
     }
 

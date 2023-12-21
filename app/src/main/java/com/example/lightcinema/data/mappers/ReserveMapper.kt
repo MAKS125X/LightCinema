@@ -2,8 +2,8 @@ package com.example.lightcinema.data.mappers
 
 import com.example.lightcinema.data.visitor.network.responses.ProfileResponse
 import com.example.lightcinema.data.visitor.network.responses.ReserveResponse
-import com.example.lightcinema.ui.screens.profile.ProfileModel
-import com.example.lightcinema.ui.screens.profile.ReserveModel
+import com.example.lightcinema.ui.screens.visitor.profile.ProfileModel
+import com.example.lightcinema.ui.screens.visitor.profile.ReserveModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale

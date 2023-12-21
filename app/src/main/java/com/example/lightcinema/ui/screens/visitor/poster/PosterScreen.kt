@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.poster
+package com.example.lightcinema.ui.screens.visitor.poster
 
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi

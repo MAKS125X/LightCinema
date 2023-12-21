@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.reserving_screen
+package com.example.lightcinema.ui.screens.visitor.reserving_screen
 
 import android.annotation.SuppressLint
 import android.util.Log

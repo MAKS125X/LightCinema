@@ -1,4 +1,4 @@
-package com.example.lightcinema.ui.screens.movie_info
+package com.example.lightcinema.ui.screens.visitor.movie_info
 
 import android.widget.Toast
 import androidx.compose.foundation.Image

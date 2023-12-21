@@ -10,10 +10,10 @@ import com.example.lightcinema.data.mappers.SeatMapper
 import com.example.lightcinema.data.visitor.network.api.VisitorService
 import com.example.lightcinema.data.visitor.network.requests.ReserveRequest
 import com.example.lightcinema.data.visitor.network.requests.UnreserveRequest
-import com.example.lightcinema.ui.screens.movie_info.MovieModel
-import com.example.lightcinema.ui.screens.profile.ProfileModel
-import com.example.lightcinema.ui.screens.reserving_screen.AnotherSessionModel
-import com.example.lightcinema.ui.screens.reserving_screen.SeatsModelCollection
+import com.example.lightcinema.ui.screens.visitor.movie_info.MovieModel
+import com.example.lightcinema.ui.screens.visitor.profile.ProfileModel
+import com.example.lightcinema.ui.screens.visitor.reserving_screen.AnotherSessionModel
+import com.example.lightcinema.ui.screens.visitor.reserving_screen.SeatsModelCollection
 import kotlinx.coroutines.flow.Flow
 import okhttp3.ResponseBody
 

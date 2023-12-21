@@ -2,8 +2,8 @@ package com.example.lightcinema.data.mappers
 
 import androidx.compose.runtime.mutableStateOf
 import com.example.lightcinema.data.visitor.network.responses.SeatsCollectionResponse
-import com.example.lightcinema.ui.screens.reserving_screen.SeatModel
-import com.example.lightcinema.ui.screens.reserving_screen.SeatsModelCollection
+import com.example.lightcinema.ui.screens.visitor.reserving_screen.SeatModel
+import com.example.lightcinema.ui.screens.visitor.reserving_screen.SeatsModelCollection
 
 object SeatMapper : Mapper<SeatsCollectionResponse, SeatsModelCollection> {
     override fun toModel(value: SeatsCollectionResponse): SeatsModelCollection {
