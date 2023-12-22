@@ -9,13 +9,25 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import retrofit2.Response
+import java.net.ConnectException
 
 fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiResponse<T>> = flow {
     emit(ApiResponse.Loading)
 
-    withTimeoutOrNull(20000L) {
-        val response = call()
+    withTimeoutOrNull(5000L) {
+//        val response = try {
+//            call.invoke()
+//        } catch (e: java.lang.Exception) {
+//
+//            if (e is ConnectException) {
+//                emit(ApiResponse.Failure(500, e.message ?: e.toString()))
+//            } else {
+//                emit(ApiResponse.Failure(400, e.message ?: e.toString()))
+//            }
+//
+//        }
         try {
+            val response = call()
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     emit(ApiResponse.Success(data))
@@ -29,10 +41,17 @@ fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiResponse<T>> = 
                 }
                 //TODO: Привязаться к коду
             }
+        } catch (e: ConnectException) {
+            emit(ApiResponse.Failure(500, "Отсутствует подключение к сети"))
         } catch (e: Exception) {
-            emit(ApiResponse.Failure(400, e.message ?: e.toString()))
+            emit(ApiResponse.Failure(400, "Внутренняя ошибка. Повторите попытку позже"))
         }
-    } ?: emit(ApiResponse.Failure(408, "Timeout! Please try again."))
+    } ?: emit(
+        ApiResponse.Failure(
+            408,
+            "Время вышло ожидания, попробуйте снова или проверьте подключение к сети"
+        )
+    )
 }.flowOn(Dispatchers.IO)
 
 fun <ResponseType : Any, ModelType : Any> Flow<ApiResponse<ResponseType>>.toModel(mapper: Mapper<ResponseType, ModelType>): Flow<ApiResponse<ModelType>> =

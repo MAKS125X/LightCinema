@@ -10,7 +10,7 @@ data class MovieModel(
     val genres: List<String>,
     val createdYear: Int,
     val countries: List<String>,
-    val onlyAdult: Boolean,
+    val ageLimit: Int,
     val imageLink: String,
     val sessionMap: Map<String, List<SessionModel>>
 )

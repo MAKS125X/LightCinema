@@ -104,6 +104,17 @@ class AppState(
         }
     }
 
+    fun navigateToAboutProgramScreen(from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(
+                "${MainDestinations.VISITOR_ROUTE}/" +
+                        "${MainDestinations.PROFILE}/${MainDestinations.ABOUT}"
+            ) {
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
 
 }
 

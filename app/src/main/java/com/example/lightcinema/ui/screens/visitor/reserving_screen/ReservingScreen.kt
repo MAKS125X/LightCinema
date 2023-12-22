@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -178,12 +180,13 @@ fun ReservingScreen(
     val sessionId by reservingViewModel.sessionId.collectAsState()
     val successString by reservingViewModel.successString.collectAsState()
     val reservingResponse by reservingViewModel.reservingResponse.collectAsState(initial = null)
-
+    var refreshing by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
     when (val response = reservingResponse) {
         is ApiResponse.Failure -> {
             Log.d("Aboba", (reservingResponse as ApiResponse.Failure).errorMessage.toString())
-            LaunchedEffect(Unit){
+            LaunchedEffect(Unit) {
                 Toast.makeText(context, response.errorMessage, Toast.LENGTH_LONG).show()
             }
         }
@@ -195,10 +198,20 @@ fun ReservingScreen(
 
         null -> {}
     }
+
     when (val movie = movieResponse) {
-        is ApiResponse.Failure -> TODO()
+        is ApiResponse.Failure -> {
+            LaunchedEffect(Unit) {
+                Toast.makeText(context, movie.errorMessage, Toast.LENGTH_LONG).show()
+            }
+        }
+
         ApiResponse.Loading -> {}
         is ApiResponse.Success -> {
+            LaunchedEffect(Unit) {
+                reservingViewModel.updateHallInfoBySession(sessionId)
+            }
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -206,7 +219,7 @@ fun ReservingScreen(
                     .padding(vertical = 4.dp, horizontal = 10.dp)
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Top,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -222,10 +235,22 @@ fun ReservingScreen(
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
-                    IconButton(
-                        onClick = upPress
-                    ) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Закрыть")
+                    Row(horizontalArrangement = Arrangement.End) {
+                        IconButton(
+                            onClick = {
+                                reservingViewModel.updateSessionsInfo(sessionId)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = "Обновить"
+                            )
+                        }
+                        IconButton(
+                            onClick = upPress
+                        ) {
+                            Icon(imageVector = Icons.Filled.Close, contentDescription = "Закрыть")
+                        }
                     }
                 }
                 FlowRow(
@@ -233,7 +258,7 @@ fun ReservingScreen(
 //                    maxItemsInEachRow = 3,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp)
+                        .padding(vertical = 5.dp)
                 ) {
                     movie.data.sessions.forEach { session ->
                         SessionInfoButton(
@@ -250,16 +275,27 @@ fun ReservingScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     when (val seatsCollection = seatsModelCollection) {
-                        is ApiResponse.Failure -> TODO()
+                        is ApiResponse.Failure -> {
+                            LaunchedEffect(Unit) {
+                                Toast.makeText(
+                                    context,
+                                    seatsCollection.errorMessage,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+
                         ApiResponse.Loading -> {
                             CircularProgressIndicator()
                         }
 
                         is ApiResponse.Success -> {
+
                             Column(
                                 Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+
                                 Text("Экран", color = MaterialTheme.colorScheme.onBackground)
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Divider(
@@ -343,7 +379,10 @@ fun ReservingScreen(
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         } else {
-                                            Log.d("Aboba", movie.data.sessions.joinToString(" "))
+                                            Log.d(
+                                                "Aboba",
+                                                movie.data.sessions.joinToString(" ")
+                                            )
                                             reservingViewModel.reserveSeats(
 //                                                seatsCollection.data,
 //                                                movie.data.sessions
@@ -375,7 +414,6 @@ fun ReservingScreen(
             }
         }
     }
-
 }
 
 

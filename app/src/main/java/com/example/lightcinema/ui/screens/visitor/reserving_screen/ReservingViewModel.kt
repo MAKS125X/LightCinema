@@ -66,8 +66,18 @@ class ReservingViewModel(
         updateHallInfoBySession(sessionId.value)
     }
 
-    private fun updateSessionsInfo(sessionId: Int) {
-        viewModelScope.launch {
+    fun updateSessionsInfo(sessionId: Int) {
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+            viewModelScope.launch(Dispatchers.Main) {
+                if (error is SocketTimeoutException) {
+                    Log.d("asd", "${error}")
+                    _movie.value = ApiResponse.Failure(
+                        500,
+                        "Произошла внутренняя ошибка. Повторите попытку позднее"
+                    )
+                }
+            }
+        }) {
             repository.getAnotherMovieSessions(sessionId).collect {
                 _movie.value = it
             }
@@ -75,11 +85,48 @@ class ReservingViewModel(
     }
 
     fun updateHallInfoBySession(sessionId: Int) {
-        viewModelScope.launch {
-            repository.getSessionSeatsById(sessionId).collect {
-                _seatsModelCollection.value = it
+//        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+//            viewModelScope.launch(Dispatchers.Main) {
+//                if (error is SocketTimeoutException) {
+//                    Log.d("asd", "${error}")
+//                    _movie.value = ApiResponse.Failure(
+//                        500,
+//                        "Произошла внутренняя ошибка. Повторите попытку позднее"
+//                    )
+//                }
+//            }
+//        }) {
+//            repository.getSessionSeatsById(sessionId).collect {
+//                _seatsModelCollection.value = it
+//            }
+//        }
+        if (movie.value is ApiResponse.Success) {
+            if ((movie.value as ApiResponse.Success<AnotherSessionModel>).data.sessions.any { it.id == sessionId }) {
+                viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+                    viewModelScope.launch(Dispatchers.Main) {
+                        if (error is SocketTimeoutException) {
+                            Log.d("asd", "${error}")
+                            _movie.value = ApiResponse.Failure(
+                                500,
+                                "Произошла внутренняя ошибка. Повторите попытку позднее"
+                            )
+                        }
+                    }
+                }) {
+                    repository.getSessionSeatsById(sessionId).collect {
+                        _seatsModelCollection.value = it
+                    }
+                }
+            } else {
+                _seatsModelCollection.tryEmit(
+                    ApiResponse.Failure(
+                        400,
+                        "На данный сеанс нельзя забронировать места"
+                    )
+                )
             }
         }
+
     }
 
     fun getCountOfSelectedSeats(seats: SeatsModelCollection): Int {
@@ -98,25 +145,35 @@ class ReservingViewModel(
                 .map { it.id }
         val movie = (movie.value as ApiResponse.Success<AnotherSessionModel>).data
         val time = movie.sessions.filter { session -> session.id == sessionId.value }
-        val time2 = time.first().time
-        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
-            viewModelScope.launch(Dispatchers.Main) {
-                if (error is SocketTimeoutException) {
-                    Log.d("asd", "${error}")
-                    _reservingResponse.tryEmit(
-                        ApiResponse.Failure(
-                            500,
-                            "Отсутствие подключения к сети"
+        Log.d("Aboba", movie.toString())
+        if (time.isNullOrEmpty()) {
+            _reservingResponse.tryEmit(
+                ApiResponse.Failure(
+                    404,
+                    "Невозможно забронировать места на начавшийся фильм"
+                )
+            )
+        } else {
+            val time2 = time.first().time
+            viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+                viewModelScope.launch(Dispatchers.Main) {
+                    if (error is SocketTimeoutException) {
+                        Log.d("asd", "${error}")
+                        _reservingResponse.tryEmit(
+                            ApiResponse.Failure(
+                                500,
+                                "Отсутствие подключения к сети"
+                            )
                         )
-                    )
+                    }
                 }
-            }
-        }) {
-            repository.reserveSeats(sessionId.value, selectedSeats).collect {
-                _reservingResponse.tryEmit(it)
-                _successString.value =
-                    "Вы забронировали ${selectedSeats.count()} мест на фильм ${movie.movieName} в " +
-                            time2
+            }) {
+                repository.reserveSeats(sessionId.value, selectedSeats).collect {
+                    _reservingResponse.tryEmit(it)
+                    _successString.value =
+                        "Вы забронировали ${selectedSeats.count()} мест на фильм ${movie.movieName} в " +
+                                time2
+                }
             }
         }
     }

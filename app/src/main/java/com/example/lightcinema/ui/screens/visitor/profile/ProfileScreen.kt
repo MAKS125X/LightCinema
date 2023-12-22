@@ -54,7 +54,8 @@ import com.example.lightcinema.ui.theme.LightCinemaTheme
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory),
-    upPress: () -> Unit
+    upPress: () -> Unit,
+    onAboutProgramClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val profileInfo = viewModel.profileInfo.collectAsState()
@@ -84,7 +85,9 @@ fun ProfileScreen(
                         value.data.login,
                         value.data.reserves,
                         { upPress() },
-                        { sessionId, seatId -> viewModel.unreserve(sessionId, seatId) })
+                        { sessionId, seatId -> viewModel.unreserve(sessionId, seatId) },
+                        { onAboutProgramClick() }
+                    )
                 }
             }
         }
@@ -99,6 +102,7 @@ fun ProfileSuccess(
     reservations: List<ReserveModel>,
     upPress: () -> Unit,
     onUnreserve: (Int, Int) -> Unit,
+    onAboutProgramClick: () -> Unit,
 ) {
     var openAlertDialog by remember { mutableStateOf(false) }
     var unreservedSeatId by remember { mutableIntStateOf(-1) }
@@ -129,7 +133,7 @@ fun ProfileSuccess(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = {
-                TODO()
+                onAboutProgramClick()
             }, modifier = Modifier.size(48.dp)) {
                 Icon(
                     imageVector = Icons.Outlined.Info,

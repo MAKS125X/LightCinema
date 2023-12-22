@@ -24,6 +24,7 @@ import com.example.lightcinema.ui.common.LightCinemaScaffold
 import com.example.lightcinema.ui.navigation.AppState
 import com.example.lightcinema.ui.navigation.MainDestinations
 import com.example.lightcinema.ui.screens.authorization.AuthScreen
+import com.example.lightcinema.ui.screens.visitor.about.AboutProgramScreen
 import com.example.lightcinema.ui.screens.visitor.movie_info.MovieInfoScreen
 import com.example.lightcinema.ui.screens.visitor.poster.PosterScreen
 import com.example.lightcinema.ui.screens.visitor.profile.ProfileScreen
@@ -65,6 +66,7 @@ class MainActivity : ComponentActivity() {
                                 onSessionClick = appState::navigateToSessionsScreen,
                                 onSuccessReservation = appState::navigateToSuccessScreen,
                                 finishReserving = appState::navigateToVisitorModule,
+                                onAboutProgramClick = appState::navigateToAboutProgramScreen
                             )
                         }
 
@@ -88,7 +90,8 @@ class MainActivity : ComponentActivity() {
         onSessionClick: (Int, NavBackStackEntry) -> Unit,
         upPress: () -> Unit,
         onSuccessReservation: (String, NavBackStackEntry) -> Unit,
-        finishReserving: (NavBackStackEntry) -> Unit
+        finishReserving: (NavBackStackEntry) -> Unit,
+        onAboutProgramClick: (NavBackStackEntry) -> Unit,
     ) {
         addAuthGraph(onSuccess = onSuccess)
         addVisitorGraph(
@@ -96,7 +99,8 @@ class MainActivity : ComponentActivity() {
             upPress = upPress,
             onSessionClick = onSessionClick,
             onSuccessReservation = onSuccessReservation,
-            finishReserving = finishReserving
+            finishReserving = finishReserving,
+            onAboutProgramClick = onAboutProgramClick,
         )
     }
 
@@ -119,6 +123,7 @@ class MainActivity : ComponentActivity() {
         upPress: () -> Unit,
         onSuccessReservation: (String, NavBackStackEntry) -> Unit,
         finishReserving: (NavBackStackEntry) -> Unit,
+        onAboutProgramClick: (NavBackStackEntry) -> Unit,
     ) {
         navigation(
             route = MainDestinations.VISITOR_ROUTE,
@@ -141,8 +146,15 @@ class MainActivity : ComponentActivity() {
             }
             composable("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.PROFILE}") {
                 ProfileScreen(
-                    upPress = { upPress() }
+                    upPress = { upPress() },
+                    onAboutProgramClick = { onAboutProgramClick(it) }
                 )
+            }
+            composable(
+                "${MainDestinations.VISITOR_ROUTE}/" +
+                        "${MainDestinations.PROFILE}/${MainDestinations.ABOUT}"
+            ) {
+                AboutProgramScreen(                )
             }
             composable(
                 "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SESSIONS}/{${MainDestinations.SESSION}}",
@@ -196,7 +208,8 @@ class MainActivity : ComponentActivity() {
             }
             composable("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.PROFILE}") {
                 ProfileScreen(
-                    upPress = { upPress() }
+                    upPress = { upPress() },
+                    onAboutProgramClick = { TODO() }
                 )
             }
             composable(

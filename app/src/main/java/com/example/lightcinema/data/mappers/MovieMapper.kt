@@ -1,8 +1,8 @@
 package com.example.lightcinema.data.mappers
 
 import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
-import com.example.lightcinema.ui.screens.visitor.movie_info.MovieModel
 import com.example.lightcinema.ui.models.SessionModel
+import com.example.lightcinema.ui.screens.visitor.movie_info.MovieModel
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -13,9 +13,13 @@ object MovieMapper : Mapper<MovieLongResponse, MovieModel> {
 
         val formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         val sessions =
-            value.sessions.groupBy({ LocalDateTime.parse(it.dateTime, formatterDate).toLocalDate() }, {
+            value.sessions.groupBy({
+                LocalDateTime.parse(it.dateTime, formatterDate).toLocalDate()
+            }, {
                 Triple<Int, LocalTime, Int>(
-                    it.id, LocalDateTime.parse(it.dateTime, formatterDate).toLocalTime(), it.minPrice
+                    it.id,
+                    LocalDateTime.parse(it.dateTime, formatterDate).toLocalTime(),
+                    it.minPrice
                 )
             })
 
@@ -23,10 +27,10 @@ object MovieMapper : Mapper<MovieLongResponse, MovieModel> {
             value.id,
             value.name,
             value.description,
-            value.genres,
+            value.genres.map { it.name },
             value.createdYear,
-            value.countries,
-            value.onlyAdult,
+            value.countries.map { it.name },
+            value.ageLimit,
             value.imageLink,
             sessions.mapKeys {
                 "${

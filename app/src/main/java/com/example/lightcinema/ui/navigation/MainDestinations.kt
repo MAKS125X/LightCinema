@@ -4,6 +4,8 @@ object MainDestinations {
     const val AUTH = "auth"
     const val SHARE = "share"
 
+    const val ABOUT = "about"
+
     const val VISITOR_ROUTE = "visitor"
 
     const val SUCCESS_ROUTE = "success"

@@ -37,6 +37,8 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.lightcinema.R
 import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.data.mappers.MovieMapper
+import com.example.lightcinema.data.visitor.network.responses.CountryResponse
+import com.example.lightcinema.data.visitor.network.responses.GenreResponse
 import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionDateResponse
 import com.example.lightcinema.ui.common.LoadIndicator
@@ -109,7 +111,7 @@ fun MovieInfo(
                 contentScale = ContentScale.FillWidth,
                 error = {
                     Image(
-                        ImageBitmap.imageResource(R.drawable.drive),
+                        ImageBitmap.imageResource(R.drawable.no_photo_hor),
                         contentDescription = "Нельзя загрузить изображение"
                     )
                 },
@@ -195,10 +197,11 @@ fun MovieInfoPreview(
             1,
             "Drive",
             "Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание Описание",
-            listOf("комедия", "взрослое кино", "пантомима"),
+            listOf(GenreResponse(1, "asd")),
             2011,
-            listOf("Россия"),
-            true,
+            listOf(CountryResponse(1, "asd")),
+            12,
+            "https://4.bp.blogspot.com/-pMdtPxE2iEk/Ty8RwlalpCI/AAAAAAAAF18/UaaLXMQIwCI/s1600/driceempire.jpg",
             "https://4.bp.blogspot.com/-pMdtPxE2iEk/Ty8RwlalpCI/AAAAAAAAF18/UaaLXMQIwCI/s1600/driceempire.jpg",
             listOf(
                 SessionDateResponse(

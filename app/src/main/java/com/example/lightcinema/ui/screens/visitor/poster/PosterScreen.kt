@@ -33,7 +33,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +56,9 @@ import com.example.lightcinema.data.visitor.network.responses.MovieCollectionRes
 import com.example.lightcinema.data.visitor.network.responses.MovieItemResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionTimeResponse
 import com.example.lightcinema.ui.common.SessionInfoButton
+import com.example.lightcinema.ui.models.SessionDate
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -64,20 +71,33 @@ fun PosterScreen(
     val today = viewModel.posterToday.collectAsState()
     val tomorrow = viewModel.posterTomorrow.collectAsState()
     val soon = viewModel.posterSoon.collectAsState()
-
+    var refreshing by remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState { 3 }
 
+
     Column(modifier = Modifier.fillMaxSize()) {
+
         Tabs(pagerState = pagerState)
-        TabsContent(
-            pagerState = pagerState,
-            onMovieClick,
-            onSessionClick,
-            today.value,
-            tomorrow.value,
-            soon.value,
-        )
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing = refreshing),
+            onRefresh = {
+                viewModel.getPosterInfo(SessionDate.Today)
+                viewModel.getPosterInfo(SessionDate.Tomorrow)
+                viewModel.getPosterInfo(SessionDate.Soon)
+                refreshing = false
+            },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            TabsContent(
+                pagerState = pagerState,
+                onMovieClick,
+                onSessionClick,
+                today.value,
+                tomorrow.value,
+                soon.value
+            )
+        }
     }
 }
 
@@ -112,8 +132,9 @@ fun TabsContent(
     onSessionClick: (Int) -> Unit,
     today: ApiResponse<MovieCollectionResponse>,
     tomorrow: ApiResponse<MovieCollectionResponse>,
-    soon: ApiResponse<MovieCollectionResponse>
+    soon: ApiResponse<MovieCollectionResponse>,
 ) {
+
     HorizontalPager(state = pagerState) { page ->
         when (page) {
             0 -> {
@@ -122,10 +143,12 @@ fun TabsContent(
                 }
             }
 
+
             1 -> {
                 Column {
                     PosterTabItem(tomorrow, true, onMovieClick, onSessionClick)
                 }
+
             }
 
             2 -> {
@@ -179,22 +202,27 @@ fun PosterTabItem(
 
         is ApiResponse.Success -> {
             Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp, 0.dp)
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    itemsIndexed(movieCollection.data.movies) { index, item ->
-                        MovieItem(
-                            movieItemResponse = item,
-                            showSessions,
-                            onMovieClick,
-                            onSessionClick
-                        )
-                        Spacer(modifier = Modifier.padding(0.dp, 8.dp))
+                if (movieCollection.data.movies.isNullOrEmpty()) {
+                    Text(text = "Бронирование на данный день окончено")
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        itemsIndexed(movieCollection.data.movies) { index, item ->
+                            MovieItem(
+                                movieItemResponse = item,
+                                showSessions,
+                                onMovieClick,
+                                onSessionClick
+                            )
+                            Spacer(modifier = Modifier.padding(0.dp, 8.dp))
+                        }
                     }
                 }
             }
@@ -234,7 +262,7 @@ fun MovieItem(
                 contentScale = ContentScale.Fit,
                 error = {
                     Image(
-                        ImageBitmap.imageResource(R.drawable.drive),
+                        ImageBitmap.imageResource(R.drawable.no_photo_ver),
                         contentDescription = "Нельзя загрузить изображение"
                     )
                 },

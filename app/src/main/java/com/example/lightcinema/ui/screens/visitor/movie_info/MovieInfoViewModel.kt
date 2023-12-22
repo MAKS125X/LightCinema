@@ -40,7 +40,7 @@ class MovieInfoViewModel(
             viewModelScope.launch(Dispatchers.Main) {
                 if (error is SocketTimeoutException) {
                     Log.d("asd", "${error}")
-                    _movie.value = ApiResponse.Failure(500, "Отсутствие подключения к сети")
+                    _movie.value = ApiResponse.Failure(500, "Произошла внутренняя ошибка. Повторите попытку позднее")
                 }
             }
         }) {
