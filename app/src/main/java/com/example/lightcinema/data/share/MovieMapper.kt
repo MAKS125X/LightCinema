@@ -1,0 +1,68 @@
+package com.example.lightcinema.data.share
+
+import com.example.lightcinema.data.common.Mapper
+import com.example.lightcinema.ui.models.Country
+import com.example.lightcinema.ui.models.Genre
+import com.example.lightcinema.ui.models.MovieModel
+import com.example.lightcinema.ui.models.SessionModel
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
+object MovieMapper : Mapper<MovieLongResponse, MovieModel> {
+    override fun toModel(value: MovieLongResponse): MovieModel {
+
+        val formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        val sessions =
+            value.sessions.groupBy({
+                LocalDateTime.parse(it.dateTime, formatterDate).toLocalDate()
+            }, {
+                Triple<Int, LocalTime, Int>(
+                    it.id,
+                    LocalDateTime.parse(it.dateTime, formatterDate).toLocalTime(),
+                    it.minPrice
+                )
+            })
+
+        return MovieModel(
+            value.id,
+            value.name,
+            value.description,
+            value.genres.map { Genre(it.id, it.name) },
+            value.createdYear,
+            value.countries.map { Country(it.id, it.name) },
+            value.ageLimit,
+            value.imageLink,
+            value.posterLink,
+            sessions.mapKeys {
+                "${
+                    it.key.format(
+                        DateTimeFormatter.ofPattern(
+                            "EEEE", Locale.getDefault()
+                        )
+                    )
+                        .replaceFirstChar { letter ->
+                            if (letter.isLowerCase()) letter.titlecase(
+                                Locale.getDefault()
+                            ) else letter.toString()
+                        }
+                } ${it.key.dayOfMonth}.${it.key.monthValue}"
+            }.mapValues {
+                it.value.map { triple ->
+                    SessionModel(
+                        triple.first, triple.second.format(
+                            DateTimeFormatter.ofPattern(
+                                "HH:mm", Locale.getDefault()
+                            )
+                        ), triple.third
+                    )
+                }
+            }
+        )
+    }
+
+    override fun fromModel(value: MovieModel): MovieLongResponse {
+        TODO("Not yet implemented")
+    }
+}

@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.data.visitor.repository.VisitorRepository
 import com.example.lightcinema.di.MyApplication
+import com.example.lightcinema.ui.models.MovieModel
 import com.example.lightcinema.ui.navigation.MainDestinations
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers

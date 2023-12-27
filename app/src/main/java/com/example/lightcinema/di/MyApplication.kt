@@ -3,18 +3,19 @@ package com.example.lightcinema.di
 import android.app.Application
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.example.lightcinema.data.admin.AdminModule
+import com.example.lightcinema.data.admin.AdminModuleNetwork
+import com.example.lightcinema.data.auth.models.AuthInterceptor
+import com.example.lightcinema.data.auth.models.TokenManager
 import com.example.lightcinema.data.auth.network.AuthService
 import com.example.lightcinema.data.auth.repository.AuthRepository
 import com.example.lightcinema.data.auth.repository.AuthRepositoryNetwork
 import com.example.lightcinema.data.visitor.VisitorModule
 import com.example.lightcinema.data.visitor.VisitorModuleNetwork
-import com.example.lightcinema.data.auth.models.AuthInterceptor
-import com.example.lightcinema.data.auth.models.TokenManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
 
 class MyApplication : Application() {
 
@@ -23,6 +24,10 @@ class MyApplication : Application() {
     val visitorModule: VisitorModule
         get() = _visitorModule
 
+    private lateinit var _adminModule: AdminModule
+    val adminModule: AdminModule
+        get() = _adminModule
+
     private lateinit var _authRepository: AuthRepository
     val authRepository: AuthRepository
         get() = _authRepository
@@ -30,6 +35,7 @@ class MyApplication : Application() {
     private lateinit var _tokenManager: TokenManager
     val tokenManager: TokenManager
         get() = _tokenManager
+
 
     override fun onCreate() {
         super.onCreate()
@@ -54,6 +60,7 @@ class MyApplication : Application() {
         _authRepository = provideAuthRepository(okHttpClient)
 
         _visitorModule = provideVisitorModule(okHttpClient)
+        _adminModule = provideAdminModule(okHttpClient)
     }
 
     private fun provideAuthRepository(okHttpClient: OkHttpClient): AuthRepositoryNetwork {
@@ -71,20 +78,21 @@ class MyApplication : Application() {
     private fun provideVisitorModule(okHttpClient: OkHttpClient) =
         VisitorModuleNetwork(okHttpClient)
 
+    private fun provideAdminModule(okHttpClient: OkHttpClient) =
+        AdminModuleNetwork(okHttpClient)
+
     private fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
     ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
-//            .addInterceptor(loggingInterceptor)
             .build()
     }
 
     companion object {
-//        const val URL: String = "http://192.168.1.65:5038"
+        //        const val URL: String = "http://192.168.1.65:5038"
         const val URL: String = "http://10.0.2.2:5038"
     }
 }

@@ -82,6 +82,37 @@ class AppState(
         }
     }
 
+    fun navigateToProfileScreenVisitor() {
+        navController.navigate(
+            "${MainDestinations.VISITOR_ROUTE}/" +
+                    "${MainDestinations.PROFILE}"
+        ) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    fun navigateToProfileScreenAdmin() {
+        navController.navigate(
+            "${MainDestinations.ADMIN_ROUTE}/" +
+                    "${MainDestinations.PROFILE}"
+        ) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    fun navigateToAboutProgramScreen(from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(
+                "${currentRoute}/${MainDestinations.ABOUT}"
+            ) {
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
+
     fun navigateToAdminModule(from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate(MainDestinations.ADMIN_ROUTE) {
@@ -94,27 +125,18 @@ class AppState(
         }
     }
 
-    fun navigateToProfileScreen() {
-        navController.navigate(
-            "${MainDestinations.VISITOR_ROUTE}/" +
-                    "${MainDestinations.PROFILE}"
-        ) {
-            launchSingleTop = true
-            restoreState = true
+    fun navigateToMovieInfoAdmin(movie: Int, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate("${currentRoute}/$movie")
         }
     }
 
-    fun navigateToAboutProgramScreen(from: NavBackStackEntry) {
+    fun navigateToCreateHallAdmin(from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            navController.navigate(
-                "${MainDestinations.VISITOR_ROUTE}/" +
-                        "${MainDestinations.PROFILE}/${MainDestinations.ABOUT}"
-            ) {
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate("${currentRoute}/${MainDestinations.HALL}")
         }
     }
+
 
 }
 

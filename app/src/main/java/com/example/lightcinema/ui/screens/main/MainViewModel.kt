@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.lightcinema.data.auth.models.TokenManager
 import com.example.lightcinema.data.auth.models.User
+import com.example.lightcinema.data.auth.models.UserRole
 import com.example.lightcinema.di.MyApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +35,11 @@ class MainViewModel(private val tokenManager: TokenManager) : ViewModel() {
     fun getName(): String {
         return userResult.value?.userName ?: "Аноним"
     }
+
+    fun getRole(): UserRole {
+        return userResult.value?.role ?: UserRole.Visitor
+    }
+
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {

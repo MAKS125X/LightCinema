@@ -20,4 +20,5 @@ object MainDestinations {
     const val PROFILE = "profile"
 
     const val ADMIN_ROUTE = "admin"
+    const val HALL = "hall"
 }

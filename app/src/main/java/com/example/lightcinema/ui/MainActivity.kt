@@ -23,13 +23,13 @@ import androidx.navigation.navigation
 import com.example.lightcinema.ui.common.LightCinemaScaffold
 import com.example.lightcinema.ui.navigation.AppState
 import com.example.lightcinema.ui.navigation.MainDestinations
+import com.example.lightcinema.ui.screens.admin.add_hall.CreateHallScreen
 import com.example.lightcinema.ui.screens.authorization.AuthScreen
 import com.example.lightcinema.ui.screens.visitor.about.AboutProgramScreen
 import com.example.lightcinema.ui.screens.visitor.movie_info.MovieInfoScreen
-import com.example.lightcinema.ui.screens.visitor.poster.PosterScreen
 import com.example.lightcinema.ui.screens.visitor.profile.ProfileScreen
-import com.example.lightcinema.ui.screens.visitor.reserving_screen.ReservingScreen
-import com.example.lightcinema.ui.screens.visitor.reserving_screen.SuccessScreen
+import com.example.lightcinema.ui.screens.visitor.reserving.ReservingScreen
+import com.example.lightcinema.ui.screens.visitor.reserving.SuccessScreen
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 
 class MainActivity : ComponentActivity() {
@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity() {
 
                 LightCinemaScaffold(
                     showTopAppBar = appState.shouldShowTopAppBar,
-                    onProfileClick = appState::navigateToProfileScreen,
+                    onProfileClickAdmin = appState::navigateToProfileScreenAdmin,
+                    onProfileClickVisitor = appState::navigateToProfileScreenVisitor,
                     onLogoutClick = appState::navigateToAuth
                 ) {
                     Surface(
@@ -54,24 +55,25 @@ class MainActivity : ComponentActivity() {
                             .padding(it),
                         color = MaterialTheme.colorScheme.background
                     ) {
-//                        SeatsModelCollectionPreview()
                         NavHost(
                             navController = appState.navController,
                             startDestination = MainDestinations.SHARE,
                         ) {
                             navGraph(
-                                onSuccess = appState::navigateToVisitorModule,
-                                onMovieClick = appState::navigateToMovieInfo,
+                                onSuccessAuthAdmin = appState::navigateToAdminModule,
+                                onSuccessAuthVisitor = appState::navigateToVisitorModule,
+                                onMovieClickVisitor = appState::navigateToMovieInfo,
                                 upPress = appState::upPress,
-                                onSessionClick = appState::navigateToSessionsScreen,
-                                onSuccessReservation = appState::navigateToSuccessScreen,
-                                finishReserving = appState::navigateToVisitorModule,
-                                onAboutProgramClick = appState::navigateToAboutProgramScreen
+                                onSessionClickVisitor = appState::navigateToSessionsScreen,
+                                onSuccessReservationVisitor = appState::navigateToSuccessScreen,
+                                finishReservingVisitor = appState::navigateToVisitorModule,
+                                onAboutProgramClickVisitor = appState::navigateToAboutProgramScreen,
+                                onMovieClickAdmin = appState::navigateToMovieInfoAdmin,
+                                onSessionClickAdmin = appState::navigateToMovieInfoAdmin,
+                                onAddHallClickAdmin = appState::navigateToCreateHallAdmin
                             )
                         }
-
                     }
-
                 }
             }
         }
@@ -85,26 +87,45 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun NavGraphBuilder.navGraph(
-        onSuccess: (NavBackStackEntry) -> Unit,
-        onMovieClick: (Int, NavBackStackEntry) -> Unit,
-        onSessionClick: (Int, NavBackStackEntry) -> Unit,
+        onSuccessAuthAdmin: (NavBackStackEntry) -> Unit,
+        onSuccessAuthVisitor: (NavBackStackEntry) -> Unit,
+        onMovieClickVisitor: (Int, NavBackStackEntry) -> Unit,
+        onSessionClickVisitor: (Int, NavBackStackEntry) -> Unit,
         upPress: () -> Unit,
-        onSuccessReservation: (String, NavBackStackEntry) -> Unit,
-        finishReserving: (NavBackStackEntry) -> Unit,
-        onAboutProgramClick: (NavBackStackEntry) -> Unit,
+        onSuccessReservationVisitor: (String, NavBackStackEntry) -> Unit,
+        finishReservingVisitor: (NavBackStackEntry) -> Unit,
+        onAboutProgramClickVisitor: (NavBackStackEntry) -> Unit,
+        onMovieClickAdmin: (Int, NavBackStackEntry) -> Unit,
+        onSessionClickAdmin: (Int, NavBackStackEntry) -> Unit,
+        onAddHallClickAdmin: (NavBackStackEntry) -> Unit,
+//        onDeleteMovieAdmin: (NavBackStackEntry) -> Unit,
     ) {
-        addAuthGraph(onSuccess = onSuccess)
+        addAuthGraph(
+            onSuccessAuthAdmin = onSuccessAuthAdmin,
+            onSuccessAuthVisitor = onSuccessAuthVisitor
+        )
         addVisitorGraph(
-            onMovieClick = onMovieClick,
+            onMovieClick = onMovieClickVisitor,
             upPress = upPress,
-            onSessionClick = onSessionClick,
-            onSuccessReservation = onSuccessReservation,
-            finishReserving = finishReserving,
-            onAboutProgramClick = onAboutProgramClick,
+            onSessionClick = onSessionClickVisitor,
+            onSuccessReservation = onSuccessReservationVisitor,
+            finishReserving = finishReservingVisitor,
+            onAboutProgramClick = onAboutProgramClickVisitor,
+        )
+        addAdminGraph(
+            onMovieClick = onMovieClickAdmin,
+            onSessionClick = onSessionClickAdmin,
+//            onDeleteMovieAdmin = onDeleteMovieAdmin,
+            upPress = upPress,
+            onAddHallClick = onAddHallClickAdmin,
+            onAboutProgramClick = onAboutProgramClickVisitor
         )
     }
 
-    private fun NavGraphBuilder.addAuthGraph(onSuccess: (NavBackStackEntry) -> Unit) {
+    private fun NavGraphBuilder.addAuthGraph(
+        onSuccessAuthAdmin: (NavBackStackEntry) -> Unit,
+        onSuccessAuthVisitor: (NavBackStackEntry) -> Unit,
+    ) {
         navigation(
             route = MainDestinations.SHARE,
             startDestination = MainDestinations.AUTH
@@ -112,7 +133,10 @@ class MainActivity : ComponentActivity() {
             composable(
                 route = MainDestinations.AUTH,
             ) {
-                AuthScreen(onSuccess = { onSuccess(it) })
+                AuthScreen(
+                    onSuccessAdmin = { onSuccessAuthAdmin(it) },
+                    onSuccessVisitor = { onSuccessAuthVisitor(it) }
+                )
             }
         }
     }
@@ -131,7 +155,7 @@ class MainActivity : ComponentActivity() {
             "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}"
         ) {
             composable("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}") {
-                PosterScreen(
+                com.example.lightcinema.ui.screens.visitor.poster.PosterScreen(
                     onMovieClick = { id -> onMovieClick(id, it) },
                     onSessionClick = { sessionId -> onSessionClick(sessionId, it) },
                 )
@@ -154,7 +178,7 @@ class MainActivity : ComponentActivity() {
                 "${MainDestinations.VISITOR_ROUTE}/" +
                         "${MainDestinations.PROFILE}/${MainDestinations.ABOUT}"
             ) {
-                AboutProgramScreen(                )
+                AboutProgramScreen()
             }
             composable(
                 "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SESSIONS}/{${MainDestinations.SESSION}}",
@@ -183,55 +207,46 @@ class MainActivity : ComponentActivity() {
     private fun NavGraphBuilder.addAdminGraph(
         onMovieClick: (Int, NavBackStackEntry) -> Unit,
         onSessionClick: (Int, NavBackStackEntry) -> Unit,
+        onAddHallClick: (NavBackStackEntry) -> Unit,
         upPress: () -> Unit,
-        onSuccessReservation: (String, NavBackStackEntry) -> Unit,
-        finishReserving: (NavBackStackEntry) -> Unit,
+        onAboutProgramClick: (NavBackStackEntry) -> Unit,
     ) {
         navigation(
-            route = MainDestinations.VISITOR_ROUTE,
+            route = MainDestinations.ADMIN_ROUTE,
             startDestination =
-            "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}"
+            "${MainDestinations.ADMIN_ROUTE}/${MainDestinations.MOVIES}"
         ) {
-            composable("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}") {
-                PosterScreen(
+            composable("${MainDestinations.ADMIN_ROUTE}/${MainDestinations.MOVIES}") {
+                com.example.lightcinema.ui.screens.admin.poster.PosterScreen(
                     onMovieClick = { id -> onMovieClick(id, it) },
-                    onSessionClick = { sessionId -> onSessionClick(sessionId, it) },
+                    addMovieClick = { onMovieClick(-1, it) },
                 )
             }
             composable(
-                "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.MOVIES}/{${MainDestinations.MOVIE_INFO}}",
+                "${MainDestinations.ADMIN_ROUTE}/${MainDestinations.MOVIES}/{${MainDestinations.MOVIE_INFO}}",
                 arguments = listOf(navArgument(MainDestinations.MOVIE_INFO) {
                     type = NavType.IntType
                 })
             ) {
-                MovieInfoScreen(onSessionClick = { sessionId -> onSessionClick(sessionId, it) })
-            }
-            composable("${MainDestinations.VISITOR_ROUTE}/${MainDestinations.PROFILE}") {
-                ProfileScreen(
-                    upPress = { upPress() },
-                    onAboutProgramClick = { TODO() }
+                com.example.lightcinema.ui.screens.admin.edit_movie.EditMovieScreen(
+                    upPress = upPress
                 )
             }
-            composable(
-                "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SESSIONS}/{${MainDestinations.SESSION}}",
-                arguments = listOf(navArgument(MainDestinations.SESSION) {
-                    type = NavType.IntType
-                })
-            ) {
-                ReservingScreen(
-                    upPress = { upPress() },
-                    finishReserving = { success -> onSuccessReservation(success, it) }
+            composable("${MainDestinations.ADMIN_ROUTE}/${MainDestinations.PROFILE}") {
+                com.example.lightcinema.ui.screens.admin.profile.ProfileScreen(
+                    upPress = upPress,
+                    addHallClick = { onAddHallClick(it) },
+                    onAboutProgramClick = { onAboutProgramClick(it) },
                 )
+            }
+            composable("${MainDestinations.ADMIN_ROUTE}/${MainDestinations.PROFILE}/${MainDestinations.HALL}") {
+                CreateHallScreen(upPress = upPress)
             }
             composable(
-                "${MainDestinations.VISITOR_ROUTE}/${MainDestinations.SUCCESS_ROUTE}/{${MainDestinations.SUCCESS}}",
-                arguments = listOf(navArgument(MainDestinations.SUCCESS) {
-                    type = NavType.StringType
-                })
+                "${MainDestinations.ADMIN_ROUTE}/" +
+                        "${MainDestinations.PROFILE}/${MainDestinations.ABOUT}"
             ) {
-                SuccessScreen(
-                    onFinish = { finishReserving(it) }
-                )
+                AboutProgramScreen()
             }
         }
     }

@@ -13,13 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -42,18 +42,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lightcinema.data.auth.models.User
+import com.example.lightcinema.data.auth.models.UserRole
 import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.ui.common.AuthTextField
-import com.example.lightcinema.ui.common.CoroutinesErrorHandler
 import com.example.lightcinema.ui.common.LoadIndicator
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AuthScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     tokenViewModel: TokenViewModel = viewModel(factory = TokenViewModel.Factory),
-    onSuccess: () -> Unit,
+    onSuccessAdmin: () -> Unit,
+    onSuccessVisitor: () -> Unit,
 ) {
     val pagerState = rememberPagerState {
         2
@@ -69,10 +70,12 @@ fun AuthScreen(
 
     val token by tokenViewModel.token.observeAsState()
 
-
-    if (token != null) {
-        onSuccess()
+    when (token?.role) {
+        UserRole.Visitor -> onSuccessVisitor()
+        UserRole.Admin -> onSuccessAdmin()
+        else -> {}
     }
+
 
     val userResult by authViewModel.userResult.collectAsState(null)
 
@@ -80,16 +83,20 @@ fun AuthScreen(
 
     when (val response = userResult) {
         is ApiResponse.Failure -> {
-            LaunchedEffect(Unit){
+            LaunchedEffect(Unit) {
                 Toast.makeText(context, response.errorMessage, Toast.LENGTH_LONG).show()
                 Log.d("asd", "${userResult.toString()}\n${token}")
             }
         }
 
         ApiResponse.Loading -> {}
+
         is ApiResponse.Success -> {
             tokenViewModel.saveToken(response.data)
-            onSuccess()
+            when (response.data.role) {
+                UserRole.Visitor -> onSuccessVisitor()
+                UserRole.Admin -> onSuccessAdmin()
+            }
         }
 
         else -> {}
@@ -121,20 +128,48 @@ fun AuthScreen(
                 repeatPassword = registerRepeatPassword,
                 onRepeatPasswordChanged = { authViewModel.setRegisterRepeatPassword(it) },
                 onRegistrationClick = {
-                    if (nickname == "") {
-                        Toast.makeText(context, "Введите имя пользователя", Toast.LENGTH_LONG)
-                            .show()
-                    }
-                    if (registerPassword == "" || registerRepeatPassword == "") {
-                        Toast.makeText(context, "Введите пароль reg", Toast.LENGTH_LONG)
-                            .show()
-                    } else if (registerPassword != registerRepeatPassword) {
-                        Toast.makeText(context, "Введённые пароли не совпадают", Toast.LENGTH_LONG)
-                            .show()
-                    } else {
-                        authViewModel.register()
-                    }
+                    when {
+                        nickname == "" -> {
+                            Toast.makeText(context, "Введите имя пользователя", Toast.LENGTH_LONG)
+                                .show()
+                        }
 
+                        nickname.trim().length !in 4..16 -> {
+                            Toast.makeText(
+                                context,
+                                "Длина имени пользователя должна быть в пределах [4;16]",
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                        }
+
+                        registerPassword == "" || registerRepeatPassword == "" -> {
+                            Toast.makeText(context, "Введите пароли", Toast.LENGTH_LONG)
+                                .show()
+                        }
+
+                        registerPassword != registerRepeatPassword -> {
+                            Toast.makeText(
+                                context,
+                                "Введённые пароли не совпадают",
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                        }
+
+                        registerPassword.length !in 4..20 -> {
+                            Toast.makeText(
+                                context,
+                                "Длина пароля должна быть в пределах [4;16]",
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                        }
+
+                        else -> {
+                            authViewModel.register()
+                        }
+                    }
                 },
                 onLoginClick = {
                     if (nickname == "") {
@@ -190,7 +225,7 @@ fun RegistrationTab(
                 onValueChange = { onNicknameChanged(it) },
                 labelText = "Имя пользователя",
                 keyboardType = KeyboardType.Text,
-                width = textFieldWidth
+                modifier = Modifier.width(textFieldWidth)
             )
             Spacer(modifier = Modifier.height(20.dp))
             AuthTextField(
@@ -198,7 +233,7 @@ fun RegistrationTab(
                 onValueChange = { onPasswordChanged(it) },
                 labelText = "Пароль",
                 keyboardType = KeyboardType.Password,
-                width = textFieldWidth
+                modifier = Modifier.width(textFieldWidth)
             )
             Spacer(modifier = Modifier.height(20.dp))
             AuthTextField(
@@ -206,7 +241,7 @@ fun RegistrationTab(
                 onValueChange = { onRepeatPasswordChanged(it) },
                 labelText = "Подтвердите пароль",
                 keyboardType = KeyboardType.Password,
-                width = textFieldWidth
+                modifier = Modifier.width(textFieldWidth)
             )
             Spacer(modifier = Modifier.height(20.dp))
             Button(
@@ -265,7 +300,7 @@ fun LoginTab(
                 onValueChange = { onNicknameChanged(it) },
                 labelText = "Имя пользователя",
                 keyboardType = KeyboardType.Text,
-                width = textFieldWidth
+                modifier = Modifier.width(textFieldWidth)
             )
             Spacer(modifier = Modifier.height(20.dp))
             AuthTextField(
@@ -273,7 +308,7 @@ fun LoginTab(
                 onValueChange = { onLoginPassword(it) },
                 labelText = "Пароль",
                 keyboardType = KeyboardType.Password,
-                width = textFieldWidth
+                modifier = Modifier.width(textFieldWidth)
             )
             Spacer(modifier = Modifier.height(20.dp))
             Button(

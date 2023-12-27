@@ -1,6 +1,6 @@
 package com.example.lightcinema.data.common
 
-import com.example.lightcinema.data.mappers.Mapper
+import android.util.Log
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +14,7 @@ import java.net.ConnectException
 fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiResponse<T>> = flow {
     emit(ApiResponse.Loading)
 
-    withTimeoutOrNull(5000L) {
+    withTimeoutOrNull(3000L) {
 //        val response = try {
 //            call.invoke()
 //        } catch (e: java.lang.Exception) {
@@ -44,12 +44,13 @@ fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiResponse<T>> = 
         } catch (e: ConnectException) {
             emit(ApiResponse.Failure(500, "Отсутствует подключение к сети"))
         } catch (e: Exception) {
+            Log.d("Internet", e.toString())
             emit(ApiResponse.Failure(400, "Внутренняя ошибка. Повторите попытку позже"))
         }
     } ?: emit(
         ApiResponse.Failure(
             408,
-            "Время вышло ожидания, попробуйте снова или проверьте подключение к сети"
+            "Время ожидания вышло, попробуйте снова или проверьте подключение к сети"
         )
     )
 }.flowOn(Dispatchers.IO)

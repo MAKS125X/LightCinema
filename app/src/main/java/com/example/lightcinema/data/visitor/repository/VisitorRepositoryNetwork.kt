@@ -3,17 +3,17 @@ package com.example.lightcinema.data.visitor.repository
 import com.example.lightcinema.data.common.ApiResponse
 import com.example.lightcinema.data.common.apiRequestFlow
 import com.example.lightcinema.data.common.toModel
-import com.example.lightcinema.data.mappers.AnotherSessionsMapper
-import com.example.lightcinema.data.mappers.MovieMapper
-import com.example.lightcinema.data.mappers.ProfileMapper
-import com.example.lightcinema.data.mappers.SeatMapper
+import com.example.lightcinema.data.visitor.mappers.AnotherSessionsMapper
+import com.example.lightcinema.data.share.MovieMapper
+import com.example.lightcinema.data.visitor.mappers.ProfileMapper
+import com.example.lightcinema.data.visitor.mappers.SeatMapper
 import com.example.lightcinema.data.visitor.network.api.VisitorService
 import com.example.lightcinema.data.visitor.network.requests.ReserveRequest
 import com.example.lightcinema.data.visitor.network.requests.UnreserveRequest
-import com.example.lightcinema.ui.screens.visitor.movie_info.MovieModel
+import com.example.lightcinema.ui.models.MovieModel
 import com.example.lightcinema.ui.screens.visitor.profile.ProfileModel
-import com.example.lightcinema.ui.screens.visitor.reserving_screen.AnotherSessionModel
-import com.example.lightcinema.ui.screens.visitor.reserving_screen.SeatsModelCollection
+import com.example.lightcinema.ui.screens.visitor.reserving.AnotherSessionModel
+import com.example.lightcinema.ui.screens.visitor.reserving.SeatsModelCollection
 import kotlinx.coroutines.flow.Flow
 import okhttp3.ResponseBody
 

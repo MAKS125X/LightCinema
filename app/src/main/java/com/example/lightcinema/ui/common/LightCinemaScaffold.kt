@@ -21,13 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lightcinema.data.auth.models.UserRole
 import com.example.lightcinema.ui.screens.main.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LightCinemaScaffold(
     showTopAppBar: Boolean,
-    onProfileClick: () -> Unit,
+    onProfileClickAdmin: () -> Unit,
+    onProfileClickVisitor: () -> Unit,
     onLogoutClick: () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -61,7 +63,11 @@ fun LightCinemaScaffold(
                 ),
                 navigationIcon = {
                     IconButton(onClick = {
-                        onProfileClick()
+                        when (mainViewModel.getRole()) {
+                            UserRole.Visitor -> onProfileClickVisitor()
+                            UserRole.Admin -> onProfileClickAdmin()
+                        }
+
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.AccountCircle,

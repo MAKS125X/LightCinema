@@ -1,11 +1,9 @@
 package com.example.lightcinema.data.visitor.network.api
 
-import com.example.lightcinema.data.common.SuccessResponse
 import com.example.lightcinema.data.visitor.network.requests.ReserveRequest
 import com.example.lightcinema.data.visitor.network.requests.UnreserveRequest
 import com.example.lightcinema.data.visitor.network.responses.MovieCollectionResponse
-import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
-import com.example.lightcinema.data.visitor.network.responses.PlaceResponse
+import com.example.lightcinema.data.share.MovieLongResponse
 import com.example.lightcinema.data.visitor.network.responses.ProfileResponse
 import com.example.lightcinema.data.visitor.network.responses.SeatsCollectionResponse
 import com.example.lightcinema.data.visitor.network.responses.SessionsByMovieResponse

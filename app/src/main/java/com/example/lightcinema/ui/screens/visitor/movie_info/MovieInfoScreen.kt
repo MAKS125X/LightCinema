@@ -36,13 +36,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import com.example.lightcinema.R
 import com.example.lightcinema.data.common.ApiResponse
-import com.example.lightcinema.data.mappers.MovieMapper
-import com.example.lightcinema.data.visitor.network.responses.CountryResponse
-import com.example.lightcinema.data.visitor.network.responses.GenreResponse
-import com.example.lightcinema.data.visitor.network.responses.MovieLongResponse
-import com.example.lightcinema.data.visitor.network.responses.SessionDateResponse
+import com.example.lightcinema.data.share.CountryResponse
+import com.example.lightcinema.data.share.GenreResponse
+import com.example.lightcinema.data.share.MovieLongResponse
+import com.example.lightcinema.data.share.MovieMapper
+import com.example.lightcinema.data.share.SessionDateResponse
 import com.example.lightcinema.ui.common.LoadIndicator
 import com.example.lightcinema.ui.common.SessionInfoButton
+import com.example.lightcinema.ui.models.MovieModel
 import com.example.lightcinema.ui.theme.LightCinemaTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -132,14 +133,14 @@ fun MovieInfo(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
-                    text = movie.genres.joinToString(", ") { it },
+                    text = movie.genres.joinToString(", ") { it.name },
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
                 )
                 Text(
-                    text = movie.countries.joinToString(", ") { it },
+                    text = movie.countries.joinToString(", ") { it.name },
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
